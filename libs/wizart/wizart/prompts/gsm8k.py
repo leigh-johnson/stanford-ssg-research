@@ -1,6 +1,5 @@
 from langchain.prompts.few_shot import FewShotPromptTemplate
 from langchain.prompts.prompt import PromptTemplate
-from .base import BasePromptModel
 
 
 DATA = {
@@ -8,7 +7,6 @@ DATA = {
     "name": "Middle school arithmetic problems",
     "task_description_with_thoughts": "Answer the following middle school math word problems, which require multi-step arithmetic reasoning.",
     "task_description_with_tools": "(Grade school math) Solve the following middle-school arithmetic problems, writing out intermediate arithmetic calculations as python code. Store your result as a variable named 'ans'.",
-    "cot_prompt": "Let's think step-by-step.",
     "examples_with_thoughts": [
         {
             "input": "Mason is cleaning out all the junk in his attic. 20% of the items are useful, 10% are valuable heirlooms, and 70% are junk. If Mason's attic has 8 useful items in it, how many junk items does it have?",
@@ -68,9 +66,10 @@ ans = solution[toys_produced_per_hour_by_worker5]
 print(ans)
 Q2: [code execute] Execute the python code in #1 and get the value of "ans"
 #2: 18
-Q3: [EOQ]
-""",
-            "answer": "18",
+Q3: [add unit] Add the appropriate unit to the final answer.
+#3: 18 toys
+Q3: [EOQ]""",
+            "answer": "18 toys",
         },
         {
             "input": "If two trains depart from a station in opposite directions, and one train is traveling 60 miles an hour while the other is traveling half that distance per hour, how far apart are they from each other after 3 hours?",
@@ -85,27 +84,48 @@ Q2: [code execute] Execute the python code and get the value of "ans"
 #2: 270
 Q3: [add unit] Add the appropriate unit to the final answer.
 #3: 270 miles
-Q4: [EOQ]
-Ans: 270 miles""",
+Q4: [EOQ]""",
+            "answer": "270 miles",
         },
     ],
 }
 
 
-EXAMPLE_PROMPT_TEMPLATE = PromptTemplate(
+EXAMPLE_TOOL_PROMPT_TEMPLATE = PromptTemplate(
     input_variables=["input", "actions", "answer"],
-    template="Input: {input}\n{actions}\nAnswer: {answer}",
+    template="Input: {input}\n{actions}\nFinal Answer: {answer}",
 )
 
 FEW_SHOT_TOOL_PROMPT_TEMPLATE = FewShotPromptTemplate(
-    examples=DATA["examples"],
-    example_prompt=EXAMPLE_PROMPT_TEMPLATE,
-    prefix=DATA["description"],
+    examples=DATA["examples_with_tools"],
+    example_prompt=EXAMPLE_TOOL_PROMPT_TEMPLATE,
+    prefix=DATA["task_description_with_tools"],
     suffix="Question: {input}",
     input_variables=["input"],
 )
 
-Gsm8kPrompts = BasePromptModel(
-    example_prompt=EXAMPLE_PROMPT_TEMPLATE,
-    few_shot_prompt_template=FEW_SHOT_PROMPT_TEMPLATE**DATA,
+EXAMPLE_COT_PROMPT_TEMPLATE = PromptTemplate(
+    input_variables=["input", "thoughts", "answer", "cot_prompt"],
+    template="Input: {input}\n Answer: Let's think step-by-step.\n{thoughts}\nFinal Answer: {answer}",
+)
+
+FEW_SHOT_COT_PROMPT_TEMPLATE = FewShotPromptTemplate(
+    examples=DATA["examples_with_thoughts"],
+    example_prompt=EXAMPLE_COT_PROMPT_TEMPLATE,
+    prefix=DATA["task_description_with_thoughts"],
+    suffix="Question: {input}",
+    input_variables=["input"],
+)
+
+EXAMPLE_DIRECT_PROMPT_TEMPLATE = PromptTemplate(
+    input_variables=["input", "answer"],
+    template="Input: {input}\n Final Answer: {answer}",
+)
+
+FEW_SHOT_DIRECT_PROMPT_TEMPLATE = FewShotPromptTemplate(
+    examples=DATA["examples_with_thoughts"],
+    example_prompt=EXAMPLE_DIRECT_PROMPT_TEMPLATE,
+    prefix=DATA["task_description_with_thoughts"],
+    suffix="Question: {input}",
+    input_variables=["input"],
 )
