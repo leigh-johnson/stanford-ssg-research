@@ -4,14 +4,17 @@ version = "0.1.0"
 description = "WizART: WizardLLM with Automatic multi-step Reasoning and Tool-use (ART)."
 authors = ["Leigh Johnson <leigh@bitsy.ai>"]
 readme = "README.md"
-packages = [{ include = "poetry_demo" }]
+packages = [{ include = "wizart" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-transformers = "^4.34.0"
+transformers = {extras = ["torch"], version = "^4.34.0"}
 click = "^8.1.7"
 langchain = "^0.0.310"
 pydantic = "^2.4.2"
+sentencepiece = "^0.1.99"
+protobuf = "^4.24.4"
+torch = "^2.1.0"
 
 [build-system]
 requires = ["poetry-core"]
