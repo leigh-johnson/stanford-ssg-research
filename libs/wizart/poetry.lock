@@ -413,6 +413,138 @@ optional = false
 python-versions = ">=3.9"
 
 [[package]]
+name = "nvidia-cublas-cu12"
+version = "12.2.5.6"
+description = "CUBLAS native runtime libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-cuda-cupti-cu12"
+version = "12.2.142"
+description = "CUDA profiling tools runtime libs."
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-cuda-nvcc-cu12"
+version = "12.2.140"
+description = "CUDA nvcc"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-cuda-nvrtc-cu12"
+version = "12.2.140"
+description = "NVRTC native runtime libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-cuda-opencl-cu12"
+version = "12.2.140"
+description = "CUDA OpenCL"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-cuda-runtime-cu12"
+version = "12.2.140"
+description = "CUDA Runtime native Libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-cudnn-cu12"
+version = "8.9.4.25"
+description = "cuDNN runtime libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[package.dependencies]
+nvidia-cublas-cu12 = "*"
+nvidia-cuda-nvrtc-cu12 = "*"
+
+[[package]]
+name = "nvidia-cufft-cu12"
+version = "11.0.8.103"
+description = "CUFFT native runtime libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-curand-cu12"
+version = "10.3.3.141"
+description = "CURAND native runtime libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-cusolver-cu12"
+version = "11.5.2.141"
+description = "CUDA solver native runtime libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[package.dependencies]
+nvidia-cublas-cu12 = "*"
+nvidia-cusparse-cu12 = "*"
+nvidia-nvjitlink-cu12 = "*"
+
+[[package]]
+name = "nvidia-cusparse-cu12"
+version = "12.1.2.141"
+description = "CUSPARSE native runtime libraries"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[package.dependencies]
+nvidia-nvjitlink-cu12 = "*"
+
+[[package]]
+name = "nvidia-nccl-cu12"
+version = "2.18.3"
+description = "NVIDIA Collective Communication Library (NCCL) Runtime"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-nvjitlink-cu12"
+version = "12.2.140"
+description = "Nvidia JIT LTO Library"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-nvml-dev-cu12"
+version = "12.2.140"
+description = "NVML native dev links, headers"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
+name = "nvidia-nvtx-cu12"
+version = "12.2.140"
+description = "NVIDIA Tools Extension"
+category = "main"
+optional = false
+python-versions = ">=3"
+
+[[package]]
 name = "packaging"
 version = "23.2"
 description = "Core utilities for Python packages"
@@ -763,7 +895,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.11"
-content-hash = "9dedb5fc54d224bf197519691852ac20a31c002fa04f5dc2759b9a0cba970db8"
+content-hash = "fd1995c42bd78756cbd81f87abced8928fab6d2fd8c3acf4cae70ff780536e99"
 
 [metadata.files]
 accelerate = [
@@ -1330,6 +1462,65 @@ numpy = [
     {file = "numpy-1.25.2-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4c3abc71e8b6edba80a01a52e66d83c5d14433cbcd26a40c329ec7ed09f37901"},
     {file = "numpy-1.25.2-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:1b9735c27cea5d995496f46a8b1cd7b408b3f34b6d50459d9ac8fe3a20cc17bf"},
     {file = "numpy-1.25.2.tar.gz", hash = "sha256:fd608e19c8d7c55021dffd43bfe5492fab8cc105cc8986f813f8c3c048b38760"},
+]
+nvidia-cublas-cu12 = [
+    {file = "nvidia_cublas_cu12-12.2.5.6-py3-none-manylinux1_x86_64.whl", hash = "sha256:f448d8db463f9a2c7dd9a1e607c0961d3e95f825b86839c5882f7d073d406df0"},
+    {file = "nvidia_cublas_cu12-12.2.5.6-py3-none-win_amd64.whl", hash = "sha256:b65d8b6e198056e4fafe998ae4e819e0be8e25554a724560a4cfd0602c5aa65b"},
+]
+nvidia-cuda-cupti-cu12 = [
+    {file = "nvidia_cuda_cupti_cu12-12.2.142-py3-none-manylinux1_x86_64.whl", hash = "sha256:ce68d1009dd14215e38ed49643d31374c71d6fea381181cb0b9da7f19dfd1624"},
+    {file = "nvidia_cuda_cupti_cu12-12.2.142-py3-none-win_amd64.whl", hash = "sha256:60d968f5ce037258ebb3a94b2a1fde4f3dc400c3d6e8531ec3af08b82d7d29dd"},
+]
+nvidia-cuda-nvcc-cu12 = [
+    {file = "nvidia_cuda_nvcc_cu12-12.2.140-py3-none-manylinux1_x86_64.whl", hash = "sha256:c6ff4ae7a636eb6cab7621191e19ac3779690686bbcf52c04d8b1ca2944e1e27"},
+    {file = "nvidia_cuda_nvcc_cu12-12.2.140-py3-none-win_amd64.whl", hash = "sha256:af4bc842b603fe6d6a93ae779dd4d73bfac95c8aa08d3bbc285eaa7ec7fb854a"},
+]
+nvidia-cuda-nvrtc-cu12 = [
+    {file = "nvidia_cuda_nvrtc_cu12-12.2.140-py3-none-manylinux1_x86_64.whl", hash = "sha256:b1cdcae6443cb7cdcfb5d1bf51896a148c9f82f9e65b27db9ab095eaed689aa7"},
+    {file = "nvidia_cuda_nvrtc_cu12-12.2.140-py3-none-win_amd64.whl", hash = "sha256:757cae04ac6de8d87ae44ecde8b02cf08b31a7b5b539eb982825d7808b2b946d"},
+]
+nvidia-cuda-opencl-cu12 = [
+    {file = "nvidia_cuda_opencl_cu12-12.2.140-py3-none-manylinux1_x86_64.whl", hash = "sha256:90f391e64c84a71ae7414319a0080f685dbab5b6adbb885b642a6c559ecff588"},
+    {file = "nvidia_cuda_opencl_cu12-12.2.140-py3-none-win_amd64.whl", hash = "sha256:e24969844f79f75c0c0fc14175b54d3918fcc1b648971e94aefb1e797922561c"},
+]
+nvidia-cuda-runtime-cu12 = [
+    {file = "nvidia_cuda_runtime_cu12-12.2.140-py3-none-manylinux1_x86_64.whl", hash = "sha256:acb9cb7e44594a3512533497ea790d9f0b0e399abcc888584c157d1ffa080e41"},
+    {file = "nvidia_cuda_runtime_cu12-12.2.140-py3-none-win_amd64.whl", hash = "sha256:3f35d098455efb847acdc5e6345b2943c6d570296d1b265adb97a500ce3ab941"},
+]
+nvidia-cudnn-cu12 = [
+    {file = "nvidia_cudnn_cu12-8.9.4.25-py3-none-manylinux1_x86_64.whl", hash = "sha256:9f882d5b11753c566fd32427839089eb4f8ba7a58c28446ad359e32c40229723"},
+    {file = "nvidia_cudnn_cu12-8.9.4.25-py3-none-win_amd64.whl", hash = "sha256:e64a6be111aa3e9af4376ea84851730f9e745f560818f6961edbdbfbcc14d62f"},
+]
+nvidia-cufft-cu12 = [
+    {file = "nvidia_cufft_cu12-11.0.8.103-py3-none-manylinux1_x86_64.whl", hash = "sha256:72e961e578f9be9e316ccb4db8652c421dd0b57442624faa71061d452f449a67"},
+    {file = "nvidia_cufft_cu12-11.0.8.103-py3-none-win_amd64.whl", hash = "sha256:9e357c00a9504e8e27d1f9b95b769a6e9a5b96e0e031044d93d80ce69a43ee9b"},
+]
+nvidia-curand-cu12 = [
+    {file = "nvidia_curand_cu12-10.3.3.141-py3-none-manylinux1_x86_64.whl", hash = "sha256:7b6bad6817b5df2a6f5ec221206fb895d9195fdd7d2443f3e86554108c141a0a"},
+    {file = "nvidia_curand_cu12-10.3.3.141-py3-none-win_amd64.whl", hash = "sha256:c9bc6e70080a68f9210d0ba33f7386cd63930fc06c5a57ffcf43ff34bbc3eae8"},
+]
+nvidia-cusolver-cu12 = [
+    {file = "nvidia_cusolver_cu12-11.5.2.141-py3-none-manylinux1_x86_64.whl", hash = "sha256:5a85c4653ce34339a5688137f494a0f903e0f0532418550998167f00844161da"},
+    {file = "nvidia_cusolver_cu12-11.5.2.141-py3-none-win_amd64.whl", hash = "sha256:415c31ff308791be04f33c527abf329a3c4da1091a11166e693f52c2c8a8bf2d"},
+]
+nvidia-cusparse-cu12 = [
+    {file = "nvidia_cusparse_cu12-12.1.2.141-py3-none-manylinux1_x86_64.whl", hash = "sha256:4e13d6a51d2303dcb2a023ba09546811161f0334fc64e13689397bbd3b1eb126"},
+    {file = "nvidia_cusparse_cu12-12.1.2.141-py3-none-win_amd64.whl", hash = "sha256:684057a4c512d6d0a301a83092fddb32924eb2855c265aa2de3e05a033da51c2"},
+]
+nvidia-nccl-cu12 = [
+    {file = "nvidia_nccl_cu12-2.18.3-py3-none-manylinux1_x86_64.whl", hash = "sha256:89cf220910c43e53df992f54f7aa2a35c6d606b077c9ae95b1f17c544d3ad3f3"},
+]
+nvidia-nvjitlink-cu12 = [
+    {file = "nvidia_nvjitlink_cu12-12.2.140-py3-none-manylinux1_x86_64.whl", hash = "sha256:95635cafbf9f96c38bea5200ab145a2e6aefbb5405e0b04c1e4ba54df2d84ec9"},
+    {file = "nvidia_nvjitlink_cu12-12.2.140-py3-none-win_amd64.whl", hash = "sha256:92f4c4e738a0385a0ff95587e65677c6a1aab325308d7b322fa18309ee32d2c0"},
+]
+nvidia-nvml-dev-cu12 = [
+    {file = "nvidia_nvml_dev_cu12-12.2.140-py3-none-manylinux1_x86_64.whl", hash = "sha256:5ddaace17f8f38112e20209df738499bbfaac895f40c7f77456242375f6c4bbd"},
+    {file = "nvidia_nvml_dev_cu12-12.2.140-py3-none-win_amd64.whl", hash = "sha256:215e89202d05386e6c8a8e8ce9dbc768508bfddc2ad38e57792214b5152162c9"},
+]
+nvidia-nvtx-cu12 = [
+    {file = "nvidia_nvtx_cu12-12.2.140-py3-none-manylinux1_x86_64.whl", hash = "sha256:10ee3d39ba38200cad81971b9a0a352193d9497fa5896ae4aa78eef598a3b934"},
+    {file = "nvidia_nvtx_cu12-12.2.140-py3-none-win_amd64.whl", hash = "sha256:96900216e615401756fdc240b24b5893c1671c1b07dcea837a26e67303d47652"},
 ]
 packaging = [
     {file = "packaging-23.2-py3-none-any.whl", hash = "sha256:8c491190033a9af7e1d931d0b5dacc2ef47509b34dd0de67ed209b5203fc88c7"},

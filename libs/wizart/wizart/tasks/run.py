@@ -1,4 +1,5 @@
 import click
+import os
 
 from langchain.agents import AgentExecutor, AgentType, initialize_agent
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
@@ -40,6 +41,7 @@ from wizart.agent.base import WizartAgent
     "--task",
     type=click.Choice(["gsm8k"]),
 )
+@click.option("--cache-dir", default="/mnt/spindle/stanford-ssg-research/.cache")
 @click.option("--task", type=click.Choice(["gsm8k"], case_sensitive=False))
 def main(
     instruct_model: str,
@@ -47,10 +49,12 @@ def main(
     math_model: str,
     prompt_template: str,
     task: str,
+    cache_dir: str
 ):
     """Benchmark WizART against a task"""
+    os.environ["TRANSFORMERS_CACHE"] = cache_dir
     tools = []
-    instruct_llm = HuggingFacePipeline.from_model_id(instruct_model, "text-generation")
+    instruct_llm = HuggingFacePipeline.from_model_id(instruct_model, "text-generation", model_kwargs=dict(cache_dir=cache_dir))
     agent = WizartAgent(llm=instruct_llm)
     agent_executor = AgentExecutor.from_agent_and_tools(
         agent=agent, tools=tools, verbose=True
