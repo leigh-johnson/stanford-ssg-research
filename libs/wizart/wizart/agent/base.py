@@ -67,5 +67,12 @@ class WizartAgent(BaseMultiActionAgent):
         """Return Identifier of an agent type."""
         return "wizart"
 
+    @property
+    def input_keys(self):
+        return ["input"]
+
     def plan(self):
         pass
+
+    def aplan(self):
+        raise NotImplemented
