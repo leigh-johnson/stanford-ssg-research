@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Any, Tuple
 
 from langchain.agents.agent import (
     Agent,
@@ -8,6 +8,17 @@ from langchain.agents.agent import (
     BaseMultiActionAgent,
 )
 
+from langchain.schema import (
+    AgentAction,
+    AgentFinish,
+    BaseOutputParser,
+    BasePromptTemplate,
+    OutputParserException,
+)
+from langchain.callbacks.manager import (
+    Callbacks,
+)
+from langchain.schema.language_model import BaseLanguageModel
 from langchain.chains.llm import LLMChain
 from langchain.agents.agent_types import AgentType
 from langchain.pydantic_v1 import Field
@@ -55,9 +66,7 @@ class WizartAgent(BaseMultiActionAgent):
     Final Answer: 18 toys
     """
 
-    llm: LLMChain
-
-    stop: List[str]
+    llm: BaseLanguageModel
 
     # TODO
     # output_parser: AgentOutputParser = Field(default_factory=WizARTOutputParser)
@@ -71,8 +80,14 @@ class WizartAgent(BaseMultiActionAgent):
     def input_keys(self):
         return ["input"]
 
-    def plan(self):
+    def plan(self,         
+        intermediate_steps: List[Tuple[AgentAction, str]],
+        callbacks: Callbacks = None,
+        **kwargs: Any,):
         pass
 
-    def aplan(self):
+    def aplan(self,
+        intermediate_steps: List[Tuple[AgentAction, str]],
+        callbacks: Callbacks = None,
+        **kwargs: Any,):
         raise NotImplemented
