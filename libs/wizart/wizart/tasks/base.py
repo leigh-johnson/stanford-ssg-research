@@ -1,28 +1,26 @@
-from dataclasses import dataclass
 from enum import Enum
+import datasets
+
+from langchain.pydantic_v1 import BaseModel
 from langchain.prompts.few_shot import FewShotPromptTemplate
 
 
 class PromptTemplateType(Enum):
     FEW_SHOT_DIRECT = "few_shot_direct"
     FEW_SHOT_AUTO_COT = "few_shot_auto_cot"
-    FEW_SHOT_ART = "few_shot_art"
+    FEW_SHOT_TOOL = "few_shot_tool"
 
 
-class TaskType(Enum):
-    GSM8K = "gsm8k"
+class BaseTask(BaseModel):
+    dataset: str
+    streaming: bool = True
+    revision: str = "main"
 
+    prompt_template: PromptTemplateType
 
-class ModelType(Enum):
-    WIZARDLM_13B_V12 = "WizardLM/WizardLM-13B-V1.2"
-
-
-@dataclass
-class BaseTaskRunner:
-    strategy: PromptTemplateType
-    template: FewShotPromptTemplate
-    task: TaskType
-    model: ModelType
-
-    def run(self):
-        raise NotImplemented
+    def load_dataset(self):
+        return datasets.load_dataset(
+            self.dataset,
+            self.revision,
+            streaming=self.streaming,
+        )

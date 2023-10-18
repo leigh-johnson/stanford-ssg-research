@@ -1,11 +1,16 @@
-import click
+from langchain.chains import LLMChain
+
+from wizart.tasks.base import BaseTask
+from wizart.prompts.gsm8k import FEW_SHOT_DIRECT_PROMPT_TEMPLATE
 
 
-@click.command()
-def main():
-    """Benchmark WizART against gsm8k grade school math word problems"""
-    pass
+class Gsm8kTask(BaseTask):
+    dataset = "gsm8k"
+    revision = "main"
 
 
-if __name__ == "__main__":
-    main()
+class DirectPromptChain(LLMChain):
+    prompt = FEW_SHOT_DIRECT_PROMPT_TEMPLATE
+
+
+TASK = Gsm8kTask
