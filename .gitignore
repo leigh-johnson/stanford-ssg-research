@@ -1,4 +1,9 @@
 ### JupyterNotebooks ###
+# reference repos; we don't want to bother tracking these as git submodules
+ref/
+.cache/
+
+### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
 
