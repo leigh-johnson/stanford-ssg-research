@@ -1,6 +1,7 @@
 import click
 import os
 
+
 from langchain.agents import AgentExecutor, AgentType, initialize_agent
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain.chains.llm import LLMChain
@@ -12,10 +13,10 @@ from wizart.tasks import load_task, load_prompt_template
 @click.option(
     "--instruct-model",
     type=click.Choice(
-        ["WizardLM/WizardLM-13B-V1.2"],
+        ["meta-llama/Llama-2-13b-hf"],
         case_sensitive=False,
     ),
-    default="WizardLM/WizardLM-13B-V1.2",
+    default="meta-llama/Llama-2-13b-hf",
 )
 @click.option(
     "--code-model",
@@ -45,6 +46,16 @@ from wizart.tasks import load_task, load_prompt_template
 @click.option("--task", type=click.Choice(["gsm8k"], case_sensitive=False))
 @click.option("--num-examples", type=int, default=10)
 @click.option("--verbose", type=bool, default=False)
+@click.option(
+    "--max-new-tokens",
+    type=int,
+    default=512,
+    help="https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig.max_new_tokens",
+)
+@click.option(
+    "--cuda-device-id", type=int, default=1, help="CUDA device id, or -1 to use CPU"
+)
+@click.option("--batch-size", type=int, default=1)
 def main(
     instruct_model: str,
     code_model: str,
@@ -54,23 +65,34 @@ def main(
     cache_dir: str,
     num_examples: int,
     verbose: bool,
+    max_new_tokens: int,
+    cuda_device_id: int,
+    batch_size: int,
 ):
     """Benchmark WizART against a task"""
     os.environ["TRANSFORMERS_CACHE"] = cache_dir
     os.environ["HF_DATASETS_CACHE"] = cache_dir
 
-    task = load_task(task)(prompt_template=prompt_template)
+    task_runner = load_task(task)(prompt_template=prompt_template)
     prompt_template_cls = load_prompt_template(task, prompt_template)
-    dataset = task.load_dataset()
+    model_kwargs = dict(cache_dir=cache_dir)
+    pipeline_kwargs = dict(max_new_tokens=max_new_tokens)
     instruct_llm = HuggingFacePipeline.from_model_id(
-        instruct_model, "text-generation", model_kwargs=dict(cache_dir=cache_dir)
+        instruct_model,
+        "text-generation",
+        device=cuda_device_id,
+        batch_size=batch_size,
+        model_kwargs=model_kwargs,
+        pipeline_kwargs=pipeline_kwargs,
     )
+    print(f"Loaded instruct model: {instruct_model}")
     llmchain = LLMChain(llm=instruct_llm, prompt=prompt_template_cls, verbose=verbose)
-    test_pairs = ((d["question"], d["answer"]) for d in dataset["test"])
-
-    # WIP: few_shot_direct_prompt
-    for test_input, test_label in test_pairs:
-        llmchain.predict(input=test_input)
+    dataset = task_runner.load_dataset()
+    for d in dataset["test"]:
+        test_input = d["question"]
+        test_answer = d["answer"]
+        result = llmchain.predict(input=test_input)
+        print(result)
 
     # TODO: few_shot_auto_cot
 

@@ -90,32 +90,33 @@ Q4: [EOQ]""",
     ],
 }
 
+# TODO
+# EXAMPLE_TOOL_PROMPT_TEMPLATE = PromptTemplate(
+#     input_variables=["input", "actions", "answer"],
+#     template="Input: {input}\n{actions}\nFinal Answer: {answer}",
+# )
 
-EXAMPLE_TOOL_PROMPT_TEMPLATE = PromptTemplate(
-    input_variables=["input", "actions", "answer"],
-    template="Input: {input}\n{actions}\nFinal Answer: {answer}",
-)
+# FEW_SHOT_TOOL_PROMPT_TEMPLATE = FewShotPromptTemplate(
+#     examples=DATA["examples_with_tools"],
+#     example_prompt=EXAMPLE_TOOL_PROMPT_TEMPLATE,
+#     prefix=DATA["task_description_with_tools"],
+#     suffix="Question: {input}",
+#     input_variables=["input"],
+# )
 
-FEW_SHOT_TOOL_PROMPT_TEMPLATE = FewShotPromptTemplate(
-    examples=DATA["examples_with_tools"],
-    example_prompt=EXAMPLE_TOOL_PROMPT_TEMPLATE,
-    prefix=DATA["task_description_with_tools"],
-    suffix="Question: {input}",
-    input_variables=["input"],
-)
+# TODO
+# EXAMPLE_COT_PROMPT_TEMPLATE = PromptTemplate(
+#     input_variables=["input", "thoughts", "answer", "cot_prompt"],
+#     template="Input: {input}\n Answer: Let's think step-by-step.\n{thoughts}\nFinal Answer: {answer}",
+# )
 
-EXAMPLE_COT_PROMPT_TEMPLATE = PromptTemplate(
-    input_variables=["input", "thoughts", "answer", "cot_prompt"],
-    template="Input: {input}\n Answer: Let's think step-by-step.\n{thoughts}\nFinal Answer: {answer}",
-)
-
-FEW_SHOT_COT_PROMPT_TEMPLATE = FewShotPromptTemplate(
-    examples=DATA["examples_with_thoughts"],
-    example_prompt=EXAMPLE_COT_PROMPT_TEMPLATE,
-    prefix=DATA["task_description_with_thoughts"],
-    suffix="Question: {input}",
-    input_variables=["input"],
-)
+# FEW_SHOT_COT_PROMPT_TEMPLATE = FewShotPromptTemplate(
+#     examples=DATA["examples_with_thoughts"],
+#     example_prompt=EXAMPLE_COT_PROMPT_TEMPLATE,
+#     prefix=DATA["task_description_with_thoughts"],
+#     suffix="Question: {input}",
+#     input_variables=["input"],
+# )
 
 EXAMPLE_DIRECT_PROMPT_TEMPLATE = PromptTemplate(
     input_variables=["input", "answer"],
