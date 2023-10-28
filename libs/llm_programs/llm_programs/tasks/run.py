@@ -74,8 +74,12 @@ def main(
     """Benchmark llm_programs against a task"""
     os.environ["TRANSFORMERS_CACHE"] = cache_dir
     os.environ["HF_DATASETS_CACHE"] = cache_dir
-
     task_runner = load_task(task)(prompt_template=prompt_template)
+    dataset = task_runner.load_dataset()
+
+    import pdb
+
+    pdb.set_trace()
     prompt_template_cls = load_prompt_template(task, prompt_template)
     model_kwargs = dict(cache_dir=cache_dir, device_map="auto")
     pipeline_kwargs = dict(max_length=max_length)
@@ -101,7 +105,7 @@ def main(
     )
     print(f"Loaded instruct model: {instruct_model}")
     llmchain = LLMChain(llm=instruct_llm, prompt=prompt_template_cls, verbose=verbose)
-    dataset = task_runner.load_dataset()
+
     for d in dataset["test"]:
         print("Question: ", d["question"])
         print("Expected Answer: ", d["answer"])
