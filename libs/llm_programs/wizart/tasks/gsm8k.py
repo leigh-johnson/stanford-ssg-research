@@ -1,7 +1,7 @@
 from langchain.chains import LLMChain
 
-from wizart.tasks.base import BaseTask
-from wizart.prompts.gsm8k import FEW_SHOT_DIRECT_PROMPT_TEMPLATE
+from llm_programs.tasks.base import BaseTask
+from llm_programs.prompts.gsm8k import FEW_SHOT_DIRECT_PROMPT_TEMPLATE
 
 
 class Gsm8kTask(BaseTask):

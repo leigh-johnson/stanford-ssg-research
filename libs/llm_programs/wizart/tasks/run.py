@@ -5,8 +5,8 @@ import os
 from langchain.agents import AgentExecutor, AgentType, initialize_agent
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain.chains.llm import LLMChain
-from wizart.agent.base import WizartAgent
-from wizart.tasks import load_task, load_prompt_template
+from llm_programs.agent.base import llm_programsAgent
+from llm_programs.tasks import load_task, load_prompt_template
 
 
 @click.command()
@@ -69,7 +69,7 @@ def main(
     cuda_device_id: int,
     batch_size: int,
 ):
-    """Benchmark WizART against a task"""
+    """Benchmark llm_programs against a task"""
     os.environ["TRANSFORMERS_CACHE"] = cache_dir
     os.environ["HF_DATASETS_CACHE"] = cache_dir
 
@@ -98,7 +98,7 @@ def main(
 
     # TODO: few_shot_tool
     # tools = []
-    # agent = WizartAgent(llm=instruct_llm)
+    # agent = llm_programsAgent(llm=instruct_llm)
     # agent_executor = AgentExecutor.from_agent_and_tools(
     #     agent=agent, tools=tools, verbose=True
     # )

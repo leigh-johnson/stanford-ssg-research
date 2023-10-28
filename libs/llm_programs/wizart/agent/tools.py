@@ -11,7 +11,7 @@ from langchain.prompts.prompt import PromptTemplate
 from langchain.chains import LLMChain
 
 
-class BaseWizartTool(BaseModel):
+class Basellm_programsTool(BaseModel):
     llm: BaseLanguageModel = Field(
         default_factory=lambda: HuggingFacePipeline.from_model_id(
             model_id="WizardLM/WizardLM-13B-V1.2", task="text-generation"
@@ -20,7 +20,7 @@ class BaseWizartTool(BaseModel):
     template: PromptTemplate
 
 
-class WizardLLMTool(BaseWizartTool, BaseTool):
+class WizardLLMTool(Basellm_programsTool, BaseTool):
     @staticmethod
     def get_description(name, description):
         raise NotImplemented
@@ -30,7 +30,7 @@ class WizardLLMTool(BaseWizartTool, BaseTool):
         output = llm_chain.run(input=query)
         return output
 
-class WizartToolkit(BaseToolkit):
+class llm_programsToolkit(BaseToolkit):
     def get_tools(self) -> List[BaseTool]:
         return [
             PythonREPLTool,
