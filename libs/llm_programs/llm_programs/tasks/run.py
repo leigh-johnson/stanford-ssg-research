@@ -1,10 +1,12 @@
 import click
 import os
 
-
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import pipeline as hf_pipeline
 from langchain.agents import AgentExecutor, AgentType, initialize_agent
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain.chains.llm import LLMChain
+
 from llm_programs.agent.base import llm_programsAgent
 from llm_programs.tasks import load_task, load_prompt_template
 
@@ -13,10 +15,10 @@ from llm_programs.tasks import load_task, load_prompt_template
 @click.option(
     "--instruct-model",
     type=click.Choice(
-        ["meta-llama/Llama-2-13b-hf"],
+        ["meta-llama/Llama-2-7b-hf"],
         case_sensitive=False,
     ),
-    default="meta-llama/Llama-2-13b-hf",
+    default="meta-llama/Llama-2-7b-hf",
 )
 @click.option(
     "--code-model",
@@ -47,7 +49,7 @@ from llm_programs.tasks import load_task, load_prompt_template
 @click.option("--num-examples", type=int, default=10)
 @click.option("--verbose", type=bool, default=False)
 @click.option(
-    "--max-new-tokens",
+    "--max-length",
     type=int,
     default=512,
     help="https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig.max_new_tokens",
@@ -65,7 +67,7 @@ def main(
     cache_dir: str,
     num_examples: int,
     verbose: bool,
-    max_new_tokens: int,
+    max_length: int,
     cuda_device_id: int,
     batch_size: int,
 ):
@@ -75,24 +77,38 @@ def main(
 
     task_runner = load_task(task)(prompt_template=prompt_template)
     prompt_template_cls = load_prompt_template(task, prompt_template)
-    model_kwargs = dict(cache_dir=cache_dir)
-    pipeline_kwargs = dict(max_new_tokens=max_new_tokens)
-    instruct_llm = HuggingFacePipeline.from_model_id(
-        instruct_model,
-        "text-generation",
-        device=cuda_device_id,
+    model_kwargs = dict(cache_dir=cache_dir, device_map="auto")
+    pipeline_kwargs = dict(max_length=max_length)
+
+    tokenizer = AutoTokenizer.from_pretrained(instruct_model, **model_kwargs)
+    model = AutoModelForCausalLM.from_pretrained(instruct_model, **model_kwargs)
+
+    pipeline = hf_pipeline(
+        task="text-generation",
+        model=model,
+        tokenizer=tokenizer,
         batch_size=batch_size,
         model_kwargs=model_kwargs,
+        **pipeline_kwargs,
+    )
+
+    instruct_llm = HuggingFacePipeline(
+        pipeline=pipeline,
+        model_id=instruct_model,
+        model_kwargs=model_kwargs,
         pipeline_kwargs=pipeline_kwargs,
+        batch_size=batch_size,
     )
     print(f"Loaded instruct model: {instruct_model}")
     llmchain = LLMChain(llm=instruct_llm, prompt=prompt_template_cls, verbose=verbose)
     dataset = task_runner.load_dataset()
     for d in dataset["test"]:
+        print("Question: ", d["question"])
+        print("Expected Answer: ", d["answer"])
         test_input = d["question"]
-        test_answer = d["answer"]
+        # test_answer = d["answer"]
         result = llmchain.predict(input=test_input)
-        print(result)
+        print("Prediction: ", result)
 
     # TODO: few_shot_auto_cot
 
