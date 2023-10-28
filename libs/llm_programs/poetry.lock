@@ -1,6 +1,6 @@
 [[package]]
 name = "accelerate"
-version = "0.23.0"
+version = "0.24.0"
 description = "Accelerate"
 category = "main"
 optional = false
@@ -1090,12 +1090,11 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.11"
-content-hash = "55996ae62515b119168a76e173a3823696201fe30cb6770f2319ceadecc59a68"
+content-hash = "5419b73c53fb027da136988680766297b2e140bd1cbde21757861c3e0a1c8178"
 
 [metadata.files]
 accelerate = [
-    {file = "accelerate-0.23.0-py3-none-any.whl", hash = "sha256:fba5065ff4e7c8f0a39df50785023703cd9bf8388073aa13c6457920f3bc5225"},
-    {file = "accelerate-0.23.0.tar.gz", hash = "sha256:2139d219fa9a37773c4279c9afebe9f681f2f29e85a29b0be8d76257bd8e4abe"},
+    {file = "accelerate-0.24.0-py3-none-any.whl", hash = "sha256:04bb1483c90eacb3beb2687cb54950d8caf9a0b93432f6b2d42efebbb6c0491e"},
 ]
 aiohttp = [
     {file = "aiohttp-3.8.6-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:41d55fc043954cddbbd82503d9cc3f4814a40bcef30b3569bc7b5e34130718c1"},
