@@ -1,5 +1,8 @@
-# 2023-10-26
+# 2023-10-28
 
+## Changelog
+
+* Renamed `wizart` package to `llm_programs`
 
 # 2023-10-18
 

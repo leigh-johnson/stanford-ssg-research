@@ -5,8 +5,8 @@ from langchain.agents.agent import AgentOutputParser
 from langchain.schema import AgentAction, AgentFinish, OutputParserException
 
 
-class WizARTOutputParser(AgentOutputParser):
-    """Output parser for the WizART agent."""
+class llm_programsOutputParser(AgentOutputParser):
+    """Output parser for the llm_programs agent."""
 
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
         action_prefix = "Action: "
@@ -29,4 +29,4 @@ class WizARTOutputParser(AgentOutputParser):
 
     @property
     def _type(self) -> str:
-        return "wizart"
+        return "llm_programs"

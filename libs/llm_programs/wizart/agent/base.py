@@ -22,7 +22,7 @@ from langchain.schema.language_model import BaseLanguageModel
 from langchain.chains.llm import LLMChain
 from langchain.agents.agent_types import AgentType
 from langchain.pydantic_v1 import Field
-from .parser import WizARTOutputParser
+from .parser import llm_programsOutputParser
 
 
 @dataclass
@@ -34,9 +34,9 @@ class WizardAgentConfig:
     task: str
 
 
-class WizartAgent(BaseMultiActionAgent):
+class llm_programsAgent(BaseMultiActionAgent):
 
-    """Agent for WizART chain
+    """Agent for llm_programs chain
 
     Execute multiple tasks in a series, generating and executing Python code for mathmatical reasoning problems.
 
@@ -69,25 +69,29 @@ class WizartAgent(BaseMultiActionAgent):
     llm: BaseLanguageModel
 
     # TODO
-    # output_parser: AgentOutputParser = Field(default_factory=WizARTOutputParser)
+    # output_parser: AgentOutputParser = Field(default_factory=llm_programsOutputParser)
 
     @property
     def _agent_type(self) -> str:
         """Return Identifier of an agent type."""
-        return "wizart"
+        return "llm_programs"
 
     @property
     def input_keys(self):
         return ["input"]
 
-    def plan(self,         
+    def plan(
+        self,
         intermediate_steps: List[Tuple[AgentAction, str]],
         callbacks: Callbacks = None,
-        **kwargs: Any,):
+        **kwargs: Any,
+    ):
         pass
 
-    def aplan(self,
+    def aplan(
+        self,
         intermediate_steps: List[Tuple[AgentAction, str]],
         callbacks: Callbacks = None,
-        **kwargs: Any,):
+        **kwargs: Any,
+    ):
         raise NotImplemented
