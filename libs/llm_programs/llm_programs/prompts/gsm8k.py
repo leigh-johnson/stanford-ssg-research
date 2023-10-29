@@ -5,7 +5,8 @@ from langchain.prompts.prompt import PromptTemplate
 DATA = {
     "id": "gsm8k",
     "name": "Middle school arithmetic problems",
-    "task_description_with_thoughts": "Answer the following middle school math word problems, which require multi-step arithmetic reasoning.",
+    "task_description": "Answer the following middle school math word problems, which require multi-step arithmetic reasoning.",
+    "task_description_cot": "Answer the following middle school math word problems, which require multi-step arithmetic reasoning. Let's think step-by-step.",
     "task_description_with_tools": "(Grade school math) Solve the following middle-school arithmetic problems, writing out intermediate arithmetic calculations as python code. Store your result as a variable named 'ans'.",
     "examples_with_thoughts": [
         {
@@ -118,15 +119,23 @@ Q4: [EOQ]""",
 #     input_variables=["input"],
 # )
 
-EXAMPLE_DIRECT_PROMPT_TEMPLATE = PromptTemplate(
-    input_variables=["input", "answer"],
-    template="Input: {input}\n Final Answer: {answer}",
+# Return a callable here
+# If these are instantiated as singletons, they leak stake
+
+ZERO_SHOT_DIRECT_PROMPT_TEMPLATE = lambda: PromptTemplate(
+    input_variables=["question", "task_description"],
+    template="{task_description}\n{question}\n",
 )
 
-FEW_SHOT_DIRECT_PROMPT_TEMPLATE = FewShotPromptTemplate(
+EXAMPLE_DIRECT_PROMPT_TEMPLATE = lambda: PromptTemplate(
+    input_variables=["input", "answer"],
+    template="Input: {input}\nFinal Answer: {answer}",
+)
+
+FEW_SHOT_DIRECT_PROMPT_TEMPLATE = lambda: FewShotPromptTemplate(
     examples=DATA["examples_with_thoughts"],
     example_prompt=EXAMPLE_DIRECT_PROMPT_TEMPLATE,
-    prefix=DATA["task_description_with_thoughts"],
+    prefix=DATA["task_description_cot"],
     suffix="Question: {input}",
     input_variables=["input"],
 )

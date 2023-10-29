@@ -1,5 +1,6 @@
 import click
 import os
+import torch
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from transformers import pipeline as hf_pipeline
@@ -7,18 +8,18 @@ from langchain.agents import AgentExecutor, AgentType, initialize_agent
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain.chains.llm import LLMChain
 
-from llm_programs.agent.base import llm_programsAgent
-from llm_programs.tasks import load_task, load_prompt_template
+from llm_programs.prompts import PromptTemplateType
+from llm_programs.tasks import load_task
 
 
 @click.command()
 @click.option(
     "--instruct-model",
     type=click.Choice(
-        ["meta-llama/Llama-2-7b-hf"],
+        ["meta-llama/Llama-2-7b-chat-hf"],
         case_sensitive=False,
     ),
-    default="meta-llama/Llama-2-7b-hf",
+    default="meta-llama/Llama-2-7b-chat-hf",
 )
 @click.option(
     "--code-model",
@@ -38,24 +39,30 @@ from llm_programs.tasks import load_task, load_prompt_template
 )
 @click.option(
     "--prompt-template",
-    type=click.Choice(
-        ["few_shot_direct", "few_shot_auto_cot", "few_shot_tool"], case_sensitive=False
-    ),
+    type=click.Choice(PromptTemplateType, case_sensitive=False),
     required=True,
 )
 @click.option("--task", type=click.Choice(["gsm8k"]), required=True)
 @click.option("--cache-dir", default="/mnt/spindle/stanford-ssg-research/.cache")
 @click.option("--task", type=click.Choice(["gsm8k"], case_sensitive=False))
-@click.option("--num-examples", type=int, default=10)
-@click.option("--verbose", type=bool, default=False)
+@click.option(
+    "--num-examples",
+    type=int,
+    default=0,
+    help="Number of examples/demos provided in prompt template (few-shot). 0 means no examples will be provided (zero-shot).",
+)
+@click.option(
+    "--num-return-sequences",
+    type=int,
+    default=1,
+    help="The number of highest-scoring beams that should be returned when using beam search, see: https://huggingface.co/blog/how-to-generate",
+)
+@click.option("--verbose", is_flag=True, default=False)
 @click.option(
     "--max-length",
     type=int,
     default=512,
     help="https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig.max_new_tokens",
-)
-@click.option(
-    "--cuda-device-id", type=int, default=1, help="CUDA device id, or -1 to use CPU"
 )
 @click.option("--batch-size", type=int, default=1)
 def main(
@@ -66,53 +73,65 @@ def main(
     task: str,
     cache_dir: str,
     num_examples: int,
+    num_return_sequences: int,
     verbose: bool,
     max_length: int,
-    cuda_device_id: int,
     batch_size: int,
 ):
     """Benchmark llm_programs against a task"""
     os.environ["TRANSFORMERS_CACHE"] = cache_dir
     os.environ["HF_DATASETS_CACHE"] = cache_dir
-    task_runner = load_task(task)(prompt_template=prompt_template)
-    dataset = task_runner.load_dataset()
 
-    import pdb
+    tokenizer = AutoTokenizer.from_pretrained(instruct_model)
 
-    pdb.set_trace()
-    prompt_template_cls = load_prompt_template(task, prompt_template)
-    model_kwargs = dict(cache_dir=cache_dir, device_map="auto")
-    pipeline_kwargs = dict(max_length=max_length)
-
-    tokenizer = AutoTokenizer.from_pretrained(instruct_model, **model_kwargs)
-    model = AutoModelForCausalLM.from_pretrained(instruct_model, **model_kwargs)
+    pipeline_kwargs = dict(
+        max_length=max_length,
+        num_return_sequences=num_return_sequences,
+        eos_token_id=tokenizer.eos_token_id,
+    )
 
     pipeline = hf_pipeline(
         task="text-generation",
-        model=model,
-        tokenizer=tokenizer,
-        batch_size=batch_size,
-        model_kwargs=model_kwargs,
-        **pipeline_kwargs,
+        model=instruct_model,
+        device_map="auto",
+        torch_dtype=torch.float16,
     )
 
-    instruct_llm = HuggingFacePipeline(
+    llm = HuggingFacePipeline(
         pipeline=pipeline,
         model_id=instruct_model,
-        model_kwargs=model_kwargs,
-        pipeline_kwargs=pipeline_kwargs,
         batch_size=batch_size,
+        pipeline_kwargs=pipeline_kwargs,
     )
     print(f"Loaded instruct model: {instruct_model}")
-    llmchain = LLMChain(llm=instruct_llm, prompt=prompt_template_cls, verbose=verbose)
+
+    task_kwargs = dict(
+        num_examples=num_examples,
+        prompt_template_type=prompt_template,
+        llm=llm,
+        verbose=verbose,
+    )
+    task_runner = load_task(task, task_kwargs)
+    dataset = task_runner.load_dataset()
+
+    task_description = "Answer the following middle school math word problems, which require multi-step arithmetic reasoning."
 
     for d in dataset["test"]:
-        print("Question: ", d["question"])
-        print("Expected Answer: ", d["answer"])
+        print("Question: \n", d["question"])
+        print("Expected Answer: \n", d["answer"])
         test_input = d["question"]
-        # test_answer = d["answer"]
-        result = llmchain.predict(input=test_input)
-        print("Prediction: ", result)
+        llmchain = task_runner.llmchain()
+        result = llmchain(
+            inputs={
+                "question": test_input.strip(),
+                "task_description": task_description,
+            },
+        )
+        print("Prediction:", result)
+        # import pdb
+
+        # pdb.set_trace()
+        print("*****")
 
     # TODO: few_shot_auto_cot
 
