@@ -1,13 +1,16 @@
-from pydantic import BaseModel
-from typing import List
-from langchain.prompts.few_shot import FewShotPromptTemplate
-from langchain.prompts.prompt import PromptTemplate
+from enum import Enum
+from langchain.llms.base import BaseLLM
 
 
-class BasePromptModel(BaseModel):
-    id: str
-    name: str
-    description: str
-    examples: List[str]
-    example_prompt_template: PromptTemplate
-    few_shot_prompt_template: FewShotPromptTemplate
+class PromptTemplateType(str, Enum):
+    ZERO_SHOT_DIRECT = "zero_shot_direct"
+    FEW_SHOT_DIRECT = "few_shot_direct"
+    FEW_SHOT_AUTO_COT = "few_shot_auto_cot"
+    FEW_SHOT_TOOL = "few_shot_tool"
+
+
+def is_zero_shot_direct(llm: BaseLLM) -> bool:
+    return (
+        llm.metadata.get("prompt_template_type", False)
+        is PromptTemplateType.ZERO_SHOT_DIRECT
+    )

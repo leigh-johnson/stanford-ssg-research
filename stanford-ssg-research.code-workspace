@@ -11,6 +11,7 @@
 		"[python]": {
 			"editor.defaultFormatter": "ms-python.black-formatter"
 		},
-		"python.formatting.provider": "none"
+		"python.formatting.provider": "none",
+		"python.defaultInterpreterPath": "/home/leigh/.cache/pypoetry/virtualenvs/llm-programs-tlAmQoB2-py3.11/bin/python"
 	}
 }
