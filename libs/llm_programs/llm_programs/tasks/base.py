@@ -3,8 +3,7 @@ import datasets
 
 from langchain.pydantic_v1 import BaseModel
 from langchain.schema.language_model import BaseLanguageModel
-from langchain.schema.prompt_template import BasePromptTemplate
-from llm_programs.prompts.base import PromptTemplateType
+from llm_programs.prompts.base import PromptTemplateType, BasePromptSelector
 from langchain.chains.prompt_selector import ConditionalPromptSelector
 
 
@@ -14,16 +13,12 @@ class BaseTask(BaseModel, ABC):
     llm: BaseLanguageModel
     num_examples: int = 0
     prompt_template_type: PromptTemplateType
-    prompt_selector: ConditionalPromptSelector
+    prompt_selector: BasePromptSelector
     streaming: bool = True
     verbose: bool = False
 
-    @abstractmethod
-    def task_description(self) -> str:
-        pass
-
     def llmchain(self):
-        prompt = self.prompt_selector.get_prompt(self.llm)
+        prompt = self.prompt_selector.get_prompt()
         return prompt | self.llm
 
     def load_dataset(self):

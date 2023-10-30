@@ -119,24 +119,19 @@ def main(
     )
     task_runner = load_task(task, task_kwargs)
     dataset = task_runner.load_dataset()
-    task_description = task_runner.task_description()
 
-    for d in dataset["test"]:
-        question = d["question"].strip()
-        answer = d["answer"].strip()
-        print("Question: \n", question)
-        print("Expected Answer: \n", answer)
+    for batch in dataset["test"].iter(batch_size=batch_size):
+        if batch_size == 1:
+            batch = [batch]
+
+        else:
+            batch = [
+                {"question": batch["question"][i], "answer": batch["answer"][i]}
+                for i in range(0, batch_size)
+            ]
         llmchain = task_runner.llmchain()
-        result = llmchain.invoke(
-            {
-                "question": question,
-                "task_description": task_description,
-            }
-        )
+        result = llmchain.batch(batch)
         print("Prediction:", result)
-        # import pdb
-
-        # pdb.set_trace()
         print("*****")
 
     # TODO: few_shot_auto_cot

@@ -1,8 +1,8 @@
 from langchain.prompts.few_shot import FewShotPromptTemplate
 from langchain.prompts.prompt import PromptTemplate
-from langchain.chains.prompt_selector import ConditionalPromptSelector
+from langchain.schema.prompt_template import BasePromptTemplate
 
-from .base import is_zero_shot_direct
+from llm_programs.prompts.base import BasePromptSelector, PromptTemplateType
 
 DATA = {
     "id": "gsm8k",
@@ -127,6 +127,7 @@ Q4: [EOQ]""",
 DIRECT_PROMPT_TASK_DESCRIPTION = "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning."
 
 ZERO_SHOT_DIRECT_PROMPT_TEMPLATE = PromptTemplate(
+    partial_variables=dict(),
     input_variables=["question", "task_description"],
     template="""{task_description}
 Question: {question}
@@ -148,7 +149,29 @@ FEW_SHOT_DIRECT_PROMPT_TEMPLATE = FewShotPromptTemplate(
 )
 
 
-PROMPT_SELECTOR = ConditionalPromptSelector(
-    default_prompt=ZERO_SHOT_DIRECT_PROMPT_TEMPLATE,
-    conditionals=[(is_zero_shot_direct, ZERO_SHOT_DIRECT_PROMPT_TEMPLATE)],
-)
+# PROMPT_SELECTOR = ConditionalPromptSelector(
+#     default_prompt=ZERO_SHOT_DIRECT_PROMPT_TEMPLATE,
+#     conditionals=[(is_zero_shot_direct, ZERO_SHOT_DIRECT_PROMPT_TEMPLATE)],
+# )
+
+
+class Gsm8kPromptSelector(BasePromptSelector):
+    def task_description(self) -> str:
+        if self.prompt_template_type is PromptTemplateType.ZERO_SHOT_DIRECT:
+            return DIRECT_PROMPT_TASK_DESCRIPTION
+        raise NotImplementedError(
+            f"Task description for {self.prompt_template_type} is not yet implemented, please add to promots/gsm8k.py"
+        )
+
+    def zero_shot_direct_prompt(self) -> BasePromptTemplate:
+        return PromptTemplate(
+            partial_variables={"task_description": self.task_description()},
+            input_variables=["question"],
+            template="""{task_description}
+Question: {question}
+Answer:
+""",
+        )
+
+
+PROMPT_SELECTOR = Gsm8kPromptSelector
