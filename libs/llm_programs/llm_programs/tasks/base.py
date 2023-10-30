@@ -18,6 +18,10 @@ class BaseTask(BaseModel, ABC):
     streaming: bool = True
     verbose: bool = False
 
+    @abstractmethod
+    def task_description(self) -> str:
+        pass
+
     def llmchain(self):
         prompt = self.prompt_selector.get_prompt(self.llm)
         return prompt | self.llm

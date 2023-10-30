@@ -119,17 +119,17 @@ def main(
     )
     task_runner = load_task(task, task_kwargs)
     dataset = task_runner.load_dataset()
-
-    task_description = "Answer the following middle school math word problems, which require multi-step arithmetic reasoning."
+    task_description = task_runner.task_description()
 
     for d in dataset["test"]:
-        print("Question: \n", d["question"])
-        print("Expected Answer: \n", d["answer"])
-        test_input = d["question"]
+        question = d["question"].strip()
+        answer = d["answer"].strip()
+        print("Question: \n", question)
+        print("Expected Answer: \n", answer)
         llmchain = task_runner.llmchain()
         result = llmchain.invoke(
             {
-                "question": test_input.strip(),
+                "question": question,
                 "task_description": task_description,
             }
         )

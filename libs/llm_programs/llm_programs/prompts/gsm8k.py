@@ -124,6 +124,8 @@ Q4: [EOQ]""",
 # Return a callable here
 # If these are instantiated as singletons, they leak stake
 
+DIRECT_PROMPT_TASK_DESCRIPTION = "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning."
+
 ZERO_SHOT_DIRECT_PROMPT_TEMPLATE = PromptTemplate(
     input_variables=["question", "task_description"],
     template="""{task_description}
