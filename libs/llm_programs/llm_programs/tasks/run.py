@@ -4,11 +4,10 @@ import torch
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from transformers import pipeline as hf_pipeline
-from langchain.agents import AgentExecutor, AgentType, initialize_agent
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
-from langchain.chains.llm import LLMChain
+from langchain.globals import set_debug, set_verbose
 
-from llm_programs.prompts import PromptTemplateType
+from llm_programs.prompts.base import PromptTemplateType
 from llm_programs.tasks import load_task
 
 
@@ -82,6 +81,10 @@ def main(
     os.environ["TRANSFORMERS_CACHE"] = cache_dir
     os.environ["HF_DATASETS_CACHE"] = cache_dir
 
+    if verbose:
+        set_debug(True)
+        set_verbose(True)
+
     tokenizer = AutoTokenizer.from_pretrained(instruct_model)
 
     pipeline_kwargs = dict(
@@ -97,11 +100,14 @@ def main(
         torch_dtype=torch.float16,
     )
 
+    metadata = dict(num_examples=num_examples, prompt_template_type=prompt_template)
+
     llm = HuggingFacePipeline(
         pipeline=pipeline,
         model_id=instruct_model,
         batch_size=batch_size,
         pipeline_kwargs=pipeline_kwargs,
+        metadata=metadata,
     )
     print(f"Loaded instruct model: {instruct_model}")
 
@@ -121,11 +127,11 @@ def main(
         print("Expected Answer: \n", d["answer"])
         test_input = d["question"]
         llmchain = task_runner.llmchain()
-        result = llmchain(
-            inputs={
+        result = llmchain.invoke(
+            {
                 "question": test_input.strip(),
                 "task_description": task_description,
-            },
+            }
         )
         print("Prediction:", result)
         # import pdb

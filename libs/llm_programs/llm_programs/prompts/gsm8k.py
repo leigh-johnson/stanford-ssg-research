@@ -1,6 +1,8 @@
 from langchain.prompts.few_shot import FewShotPromptTemplate
 from langchain.prompts.prompt import PromptTemplate
+from langchain.chains.prompt_selector import ConditionalPromptSelector
 
+from .base import is_zero_shot_direct
 
 DATA = {
     "id": "gsm8k",
@@ -122,20 +124,29 @@ Q4: [EOQ]""",
 # Return a callable here
 # If these are instantiated as singletons, they leak stake
 
-ZERO_SHOT_DIRECT_PROMPT_TEMPLATE = lambda: PromptTemplate(
+ZERO_SHOT_DIRECT_PROMPT_TEMPLATE = PromptTemplate(
     input_variables=["question", "task_description"],
-    template="{task_description}\n{question}\n",
+    template="""{task_description}
+Question: {question}
+Answer:
+""",
 )
 
-EXAMPLE_DIRECT_PROMPT_TEMPLATE = lambda: PromptTemplate(
+EXAMPLE_DIRECT_PROMPT_TEMPLATE = PromptTemplate(
     input_variables=["input", "answer"],
     template="Input: {input}\nFinal Answer: {answer}",
 )
 
-FEW_SHOT_DIRECT_PROMPT_TEMPLATE = lambda: FewShotPromptTemplate(
+FEW_SHOT_DIRECT_PROMPT_TEMPLATE = FewShotPromptTemplate(
     examples=DATA["examples_with_thoughts"],
     example_prompt=EXAMPLE_DIRECT_PROMPT_TEMPLATE,
     prefix=DATA["task_description_cot"],
     suffix="Question: {input}",
     input_variables=["input"],
+)
+
+
+PROMPT_SELECTOR = ConditionalPromptSelector(
+    default_prompt=ZERO_SHOT_DIRECT_PROMPT_TEMPLATE,
+    conditionals=[(is_zero_shot_direct, ZERO_SHOT_DIRECT_PROMPT_TEMPLATE)],
 )
