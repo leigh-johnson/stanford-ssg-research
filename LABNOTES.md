@@ -1,3 +1,14 @@
+# 2023-10-30
+
+Realized perplexity measurement would naturally decrease for codegen and tool-enhanced prompts, if comparing tool-augmented response with benchmark ground truth.
+
+- [ ] Read ["Evaluating Large Language Models Trained on Code"](https://arxiv.org/pdf/2107.03374.pdf) to understand `pass@k` evaluation metric.
+- [ ] Read ["ToolLLM: Facilitating Large Language Models to Master 16000+ Real-world APIs"] to understand metrics used by [ToolBench](https://openbmb.github.io/ToolBench/). See also: [ToolEval README](https://github.com/OpenBMB/ToolBench/tree/master/toolbench/tooleval)
+
+## Changelog
+
+* Pass command-line arg `--batch-size` to set a batch size (default: 1)
+
 # 2023-10-28
 
 ## Changelog
