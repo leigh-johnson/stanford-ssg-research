@@ -118,21 +118,7 @@ def main(
         verbose=verbose,
     )
     task_runner = load_task(task, task_kwargs)
-    dataset = task_runner.load_dataset()
-
-    for batch in dataset["test"].iter(batch_size=batch_size):
-        if batch_size == 1:
-            batch = [batch]
-
-        else:
-            batch = [
-                {"question": batch["question"][i], "answer": batch["answer"][i]}
-                for i in range(0, batch_size)
-            ]
-        llmchain = task_runner.llmchain()
-        result = llmchain.batch(batch)
-        print("Prediction:", result)
-        print("*****")
+    task_runner.run()
 
     # TODO: few_shot_auto_cot
 

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import datasets
+from datasets import Dataset
 
 from langchain.pydantic_v1 import BaseModel
 from langchain.schema.language_model import BaseLanguageModel
@@ -16,6 +17,7 @@ class BaseTask(BaseModel, ABC):
     prompt_selector: BasePromptSelector
     streaming: bool = True
     verbose: bool = False
+    batch_size: int = 1
 
     def llmchain(self):
         prompt = self.prompt_selector.get_prompt()
@@ -28,5 +30,29 @@ class BaseTask(BaseModel, ABC):
             streaming=self.streaming,
         )
 
+    def calc_batch_accuracy(self, input_batch: Dataset, ground_truth_batch: Dataset):
+        pass
+
+    def calc_batch_perplexity(self):
+        pass
+
+    def calc_batch_ptest(self):
+        pass
+
+    def score_batch(self, batch):
+        if self.batch_size == 1:
+            batch = [batch]
+
+        else:
+            batch = [
+                {"question": batch["question"][i], "answer": batch["answer"][i]}
+                for i in range(0, self.batch_size)
+            ]
+        llmchain = self.llmchain()
+        responses = Dataset.from_list(llmchain.batch(batch))
+        print("Prediction:", responses)
+        print("*****")
+
     def run(self):
         dataset = self.load_dataset()
+        dataset["test"].map(self.score_batch, batch_size=self.batch_size)

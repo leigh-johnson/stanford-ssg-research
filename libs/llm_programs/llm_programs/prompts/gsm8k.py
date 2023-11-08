@@ -4,6 +4,8 @@ from langchain.schema.prompt_template import BasePromptTemplate
 
 from llm_programs.prompts.base import BasePromptSelector, PromptTemplateType
 
+ANSWER_TOKEN = "####"  # indictates the final answer in ground truth
+
 DATA = {
     "id": "gsm8k",
     "name": "Middle school arithmetic problems",
@@ -175,3 +177,17 @@ Answer:
 
 
 PROMPT_SELECTOR = Gsm8kPromptSelector
+
+
+def parse_final_answer(text: str) -> str:
+    """
+    Parse final result line in GSM8k dataset
+
+    Example input:
+    Natalia sold 48/2 = <<48/2=24>>24 clips in May. Natalia sold 48+24 = <<48+24=72>>72 clips altogether in April and May.
+    #### 72
+
+    Example output:
+    72
+    """
+    return text.split(ANSWER_TOKEN)[-1].strip()
