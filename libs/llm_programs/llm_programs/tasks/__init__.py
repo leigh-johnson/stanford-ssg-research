@@ -7,11 +7,11 @@ from langchain.prompts.few_shot import FewShotPromptTemplate
 def load_task(task: str, task_kwargs: Dict[str, Any]) -> BaseTask:
     task_module = importlib.import_module(f"llm_programs.tasks.{task}")
     prompt_module = importlib.import_module(f"llm_programs.prompts.{task}")
-    prompt_selector = prompt_module.PROMPT_SELECTOR(
+    prompt = prompt_module.PROMPT(
         num_examples=task_kwargs["num_examples"],
         prompt_template_type=task_kwargs["prompt_template_type"],
     )
-    return task_module.TASK(prompt_selector=prompt_selector, **task_kwargs)
+    return task_module.TASK(prompt=prompt, **task_kwargs)
 
 
 # def load_prompt_template(

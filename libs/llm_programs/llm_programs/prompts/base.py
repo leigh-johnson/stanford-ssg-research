@@ -14,19 +14,20 @@ class PromptTemplateType(str, Enum):
 
 
 def is_zero_shot_direct(llm: BaseLLM) -> bool:
-    return (
-        llm.metadata.get("prompt_template_type", False)
-        is PromptTemplateType.ZERO_SHOT_DIRECT
-    )
+    return llm.metadata.get("prompt_template_type", False) is PromptTemplateType.ZERO_SHOT_DIRECT
 
 
-class BasePromptSelector(BaseModel, ABC):
+class BasePrompt(BaseModel, ABC):
     """
     This class is responsible for instantiating a BasePromptTemplate, based on number of examples and the requested prompt template type.
     """
 
     num_examples: int = 0
     prompt_template_type: PromptTemplateType
+
+    @abstractmethod
+    def parse_final_answer(self) -> str:
+        pass
 
     @abstractmethod
     def task_description(self) -> str:

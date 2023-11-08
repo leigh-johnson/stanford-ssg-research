@@ -63,6 +63,12 @@ from llm_programs.tasks import load_task
     default=512,
     help="https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig.max_new_tokens",
 )
+@click.option(
+    "--sample",
+    type=int,
+    default=-1,
+    help="Sample first N records in task dataset. If -1, all available samples will be used.",
+)
 @click.option("--batch-size", type=int, default=1)
 def main(
     instruct_model: str,
@@ -76,6 +82,7 @@ def main(
     verbose: bool,
     max_length: int,
     batch_size: int,
+    sample: int,
 ):
     """Benchmark llm_programs against a task"""
     os.environ["TRANSFORMERS_CACHE"] = cache_dir

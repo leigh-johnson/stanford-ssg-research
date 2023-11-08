@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 import datasets
+import evaluate
+
 from datasets import Dataset
 
 from langchain.pydantic_v1 import BaseModel
 from langchain.schema.language_model import BaseLanguageModel
-from llm_programs.prompts.base import PromptTemplateType, BasePromptSelector
-from langchain.chains.prompt_selector import ConditionalPromptSelector
+from llm_programs.prompts.base import PromptTemplateType, BasePrompt
 
 
 class BaseTask(BaseModel, ABC):
@@ -14,13 +15,13 @@ class BaseTask(BaseModel, ABC):
     llm: BaseLanguageModel
     num_examples: int = 0
     prompt_template_type: PromptTemplateType
-    prompt_selector: BasePromptSelector
+    prompt: BasePrompt
     streaming: bool = True
     verbose: bool = False
     batch_size: int = 1
 
     def llmchain(self):
-        prompt = self.prompt_selector.get_prompt()
+        prompt = self.prompt.get_prompt()
         return prompt | self.llm
 
     def load_dataset(self):
@@ -30,8 +31,16 @@ class BaseTask(BaseModel, ABC):
             streaming=self.streaming,
         )
 
-    def calc_batch_accuracy(self, input_batch: Dataset, ground_truth_batch: Dataset):
-        pass
+    def calc_batch_accuracy(self, batch):
+        results = []
+
+        for i in range(self.batch_size):
+            expected = self.prompt.parse_final_answer(batch["answer"][i])
+            hit = expected in batch["responses"][i]
+            results.append(hit)
+
+        batch["results"] = results
+        return batch
 
     def calc_batch_perplexity(self):
         pass
@@ -41,18 +50,22 @@ class BaseTask(BaseModel, ABC):
 
     def score_batch(self, batch):
         if self.batch_size == 1:
-            batch = [batch]
+            transformed_batch = [batch]
 
         else:
-            batch = [
-                {"question": batch["question"][i], "answer": batch["answer"][i]}
-                for i in range(0, self.batch_size)
+            transformed_batch = [
+                {"question": batch["question"][i], "answer": batch["answer"][i]} for i in range(0, self.batch_size)
             ]
         llmchain = self.llmchain()
-        responses = Dataset.from_list(llmchain.batch(batch))
+        responses = llmchain.batch(transformed_batch)
         print("Prediction:", responses)
         print("*****")
+        batch["responses"] = responses
+        return self.calc_batch_accuracy(batch)
 
     def run(self):
         dataset = self.load_dataset()
-        dataset["test"].map(self.score_batch, batch_size=self.batch_size)
+        dataset = dataset["test"].map(self.score_batch, batch_size=self.batch_size, batched=True)
+        dataset = dataset.map(self.score_batch, batch_size=self.batch_size, batched=True)
+        next(iter(dataset))
+        next(iter(dataset))

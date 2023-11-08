@@ -1,9 +1,15 @@
+# 2023-11-08
+
+Working hypothesis: For the GSM8K benchmark task, LLAMA-2-7b-chat-hf will perform worse than OpenAI text-davinci-002 as the reasoning engine in an Automatic multi-step reasoning (ART) LLM architechture.
+
+* Implemented accuracy metric
+
 # 2023-10-30
 
 Realized perplexity measurement would naturally decrease for codegen and tool-enhanced prompts, if comparing tool-augmented response with benchmark ground truth.
 
-- [ ] Read ["Evaluating Large Language Models Trained on Code"](https://arxiv.org/pdf/2107.03374.pdf) to understand `pass@k` evaluation metric.
-- [ ] Read ["ToolLLM: Facilitating Large Language Models to Master 16000+ Real-world APIs"] to understand metrics used by [ToolBench](https://openbmb.github.io/ToolBench/). See also: [ToolEval README](https://github.com/OpenBMB/ToolBench/tree/master/toolbench/tooleval)
+- [x] Read ["Evaluating Large Language Models Trained on Code"](https://arxiv.org/pdf/2107.03374.pdf) to understand `pass@k` evaluation metric.
+- [x] Read ["ToolLLM: Facilitating Large Language Models to Master 16000+ Real-world APIs"] to understand metrics used by [ToolBench](https://openbmb.github.io/ToolBench/). See also: [ToolEval README](https://github.com/OpenBMB/ToolBench/tree/master/toolbench/tooleval)
 
 ## Changelog
 

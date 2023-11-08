@@ -2,7 +2,7 @@ from langchain.prompts.few_shot import FewShotPromptTemplate
 from langchain.prompts.prompt import PromptTemplate
 from langchain.schema.prompt_template import BasePromptTemplate
 
-from llm_programs.prompts.base import BasePromptSelector, PromptTemplateType
+from llm_programs.prompts.base import BasePrompt, PromptTemplateType
 
 ANSWER_TOKEN = "####"  # indictates the final answer in ground truth
 
@@ -126,7 +126,9 @@ Q4: [EOQ]""",
 # Return a callable here
 # If these are instantiated as singletons, they leak stake
 
-DIRECT_PROMPT_TASK_DESCRIPTION = "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning."
+DIRECT_PROMPT_TASK_DESCRIPTION = (
+    "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning."
+)
 
 ZERO_SHOT_DIRECT_PROMPT_TEMPLATE = PromptTemplate(
     partial_variables=dict(),
@@ -157,7 +159,20 @@ FEW_SHOT_DIRECT_PROMPT_TEMPLATE = FewShotPromptTemplate(
 # )
 
 
-class Gsm8kPromptSelector(BasePromptSelector):
+class Gsm8kPrompt(BasePrompt):
+    def parse_final_answer(self, text: str) -> str:
+        """
+        Parse final result line in GSM8k dataset
+
+        Example input:
+        Natalia sold 48/2 = <<48/2=24>>24 clips in May. Natalia sold 48+24 = <<48+24=72>>72 clips altogether in April and May.
+        #### 72
+
+        Example output:
+        72
+        """
+        return text.split(ANSWER_TOKEN)[-1].strip()
+
     def task_description(self) -> str:
         if self.prompt_template_type is PromptTemplateType.ZERO_SHOT_DIRECT:
             return DIRECT_PROMPT_TASK_DESCRIPTION
@@ -176,18 +191,4 @@ Answer:
         )
 
 
-PROMPT_SELECTOR = Gsm8kPromptSelector
-
-
-def parse_final_answer(text: str) -> str:
-    """
-    Parse final result line in GSM8k dataset
-
-    Example input:
-    Natalia sold 48/2 = <<48/2=24>>24 clips in May. Natalia sold 48+24 = <<48+24=72>>72 clips altogether in April and May.
-    #### 72
-
-    Example output:
-    72
-    """
-    return text.split(ANSWER_TOKEN)[-1].strip()
+PROMPT = Gsm8kPrompt
