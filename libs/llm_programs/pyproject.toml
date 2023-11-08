@@ -31,6 +31,7 @@ accelerate = "^0.24.0"
 notebook = "^7.0.6"
 ipywidgets = "^8.1.1"
 langchain = "^0.0.325"
+evaluate = "^0.4.1"
 
 [build-system]
 requires = ["poetry-core"]
