@@ -123,6 +123,7 @@ def main(
         prompt_template_type=prompt_template,
         llm=llm,
         verbose=verbose,
+        instruct_model_id=instruct_model,
     )
     task_runner = load_task(task, task_kwargs)
     task_runner.run()

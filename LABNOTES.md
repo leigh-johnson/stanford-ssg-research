@@ -2,13 +2,34 @@
 
 Working hypothesis: For the GSM8K benchmark task, LLAMA-2-7b-chat-hf will perform worse than OpenAI text-davinci-002 as the reasoning engine in an Automatic multi-step reasoning (ART) LLM architechture.
 
+Presentation next week:
+* What would I learn if the hypothesis is true?
+* What would I learn if the hypothesis is false?
+* What am I measuring to explain the results observed in my experiment?
+  * Perplexity
+  * Performance on base GSM8K vs. performance on new problems of my design
+
 * Implemented accuracy metric
+* Can we use an annealed metric? 
+  * Start with a high degree of change in temperature, then decrease
+
+* Create a hold-out set of GSM8K prompts
+* What is Davinci's cut-off date?
+  * Ditto LLAMA-2
+
+* Physics with nails
+
+Jacob went to the store
+Jacob went to the gas station
+
+Jacob went to the panic! at the disco
 
 # 2023-10-30
 
 Realized perplexity measurement would naturally decrease for codegen and tool-enhanced prompts, if comparing tool-augmented response with benchmark ground truth.
 
 - [x] Read ["Evaluating Large Language Models Trained on Code"](https://arxiv.org/pdf/2107.03374.pdf) to understand `pass@k` evaluation metric.
+
 - [x] Read ["ToolLLM: Facilitating Large Language Models to Master 16000+ Real-world APIs"] to understand metrics used by [ToolBench](https://openbmb.github.io/ToolBench/). See also: [ToolEval README](https://github.com/OpenBMB/ToolBench/tree/master/toolbench/tooleval)
 
 ## Changelog
