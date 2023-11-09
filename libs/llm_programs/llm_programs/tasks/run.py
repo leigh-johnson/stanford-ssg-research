@@ -63,6 +63,12 @@ from llm_programs.tasks import load_task
     default=512,
     help="https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig.max_new_tokens",
 )
+@click.option(
+    "--sample",
+    type=int,
+    default=-1,
+    help="Sample first N records in task dataset. If -1, all available samples will be used.",
+)
 @click.option("--batch-size", type=int, default=1)
 def main(
     instruct_model: str,
@@ -76,6 +82,7 @@ def main(
     verbose: bool,
     max_length: int,
     batch_size: int,
+    sample: int,
 ):
     """Benchmark llm_programs against a task"""
     os.environ["TRANSFORMERS_CACHE"] = cache_dir
@@ -116,23 +123,10 @@ def main(
         prompt_template_type=prompt_template,
         llm=llm,
         verbose=verbose,
+        instruct_model_id=instruct_model,
     )
     task_runner = load_task(task, task_kwargs)
-    dataset = task_runner.load_dataset()
-
-    for batch in dataset["test"].iter(batch_size=batch_size):
-        if batch_size == 1:
-            batch = [batch]
-
-        else:
-            batch = [
-                {"question": batch["question"][i], "answer": batch["answer"][i]}
-                for i in range(0, batch_size)
-            ]
-        llmchain = task_runner.llmchain()
-        result = llmchain.batch(batch)
-        print("Prediction:", result)
-        print("*****")
+    task_runner.run()
 
     # TODO: few_shot_auto_cot
 
