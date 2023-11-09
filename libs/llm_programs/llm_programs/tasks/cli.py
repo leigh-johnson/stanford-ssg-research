@@ -12,14 +12,8 @@ from llm_programs.tasks import load_task
 
 
 @click.command()
-@click.option(
-    "--instruct-model",
-    type=click.Choice(
-        ["meta-llama/Llama-2-7b-chat-hf"],
-        case_sensitive=False,
-    ),
-    default="meta-llama/Llama-2-7b-chat-hf",
-)
+@click.option("--batch-size", type=int, default=1)
+@click.option("--cache-dir", default="/mnt/spindle/stanford-ssg-research/.cache")
 @click.option(
     "--code-model",
     type=click.Choice(
@@ -27,6 +21,14 @@ from llm_programs.tasks import load_task
         case_sensitive=False,
     ),
     default="WizardLM/WizardCoder-Python-13B-V1.0",
+)
+@click.option(
+    "--instruct-model",
+    type=click.Choice(
+        ["meta-llama/Llama-2-7b-chat-hf"],
+        case_sensitive=False,
+    ),
+    default="meta-llama/Llama-2-7b-chat-hf",
 )
 @click.option(
     "--math-model",
@@ -37,13 +39,11 @@ from llm_programs.tasks import load_task
     default="WizardLM/WizardMath-13B-V1.0",
 )
 @click.option(
-    "--prompt-template",
-    type=click.Choice(PromptTemplateType, case_sensitive=False),
-    required=True,
+    "--max-length",
+    type=int,
+    default=512,
+    help="https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig.max_new_tokens",
 )
-@click.option("--task", type=click.Choice(["gsm8k"]), required=True)
-@click.option("--cache-dir", default="/mnt/spindle/stanford-ssg-research/.cache")
-@click.option("--task", type=click.Choice(["gsm8k"], case_sensitive=False))
 @click.option(
     "--num-examples",
     type=int,
@@ -56,12 +56,10 @@ from llm_programs.tasks import load_task
     default=1,
     help="The number of highest-scoring beams that should be returned when using beam search, see: https://huggingface.co/blog/how-to-generate",
 )
-@click.option("--verbose", is_flag=True, default=False)
 @click.option(
-    "--max-length",
-    type=int,
-    default=512,
-    help="https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig.max_new_tokens",
+    "--prompt-template",
+    type=click.Choice(PromptTemplateType, case_sensitive=False),
+    required=True,
 )
 @click.option(
     "--sample",
@@ -69,20 +67,21 @@ from llm_programs.tasks import load_task
     default=-1,
     help="Sample first N records in task dataset. If -1, all available samples will be used.",
 )
-@click.option("--batch-size", type=int, default=1)
+@click.option("--task", type=click.Choice(["gsm8k"], case_sensitive=False))
+@click.option("--verbose", is_flag=True, default=False)
 def main(
-    instruct_model: str,
-    code_model: str,
-    math_model: str,
-    prompt_template: str,
-    task: str,
+    batch_size: int,
     cache_dir: str,
+    code_model: str,
+    instruct_model: str,
+    math_model: str,
+    max_length: int,
     num_examples: int,
     num_return_sequences: int,
-    verbose: bool,
-    max_length: int,
-    batch_size: int,
+    prompt_template: str,
     sample: int,
+    task: str,
+    verbose: bool,
 ):
     """Benchmark llm_programs against a task"""
     os.environ["TRANSFORMERS_CACHE"] = cache_dir
