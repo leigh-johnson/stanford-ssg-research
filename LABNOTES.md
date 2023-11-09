@@ -9,20 +9,13 @@ Presentation next week:
   * Perplexity
   * Performance on base GSM8K vs. performance on new problems of my design
 
-* Implemented accuracy metric
-* Can we use an annealed metric? 
+* Can we use an annealed metric to see how changes affect the final results? 
   * Start with a high degree of change in temperature, then decrease
 
 * Create a hold-out set of GSM8K prompts
-* What is Davinci's cut-off date?
-  * Ditto LLAMA-2
+* What is Davinci's dataset cut-off date? What is LLAMA-2's cutoff date?
 
-* Physics with nails
-
-Jacob went to the store
-Jacob went to the gas station
-
-Jacob went to the panic! at the disco
+* Are there other modalities we'd want to test? e.g. physics with a string tied to a nail.
 
 # 2023-10-30
 
