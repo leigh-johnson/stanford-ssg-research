@@ -65,9 +65,9 @@ from llm_programs.llms.huggingface_pipeline import BatchedHuggingFacePipeline
 )
 @click.option(
     "--sample",
-    type=int,
-    default=-1,
-    help="Sample first N records in task dataset. If -1, all available samples will be used.",
+    type=bool,
+    default=True,
+    help="Sample generated token sequences. If false, greedy match is used.",
 )
 @click.option("--task", type=click.Choice(["gsm8k"], case_sensitive=False))
 @click.option(
@@ -124,7 +124,7 @@ def main(
         eos_token_id=tokenizer.eos_token_id,
     )
 
-    model_kwargs = dict(temperature=temperature, top_p=top_p, do_sample=True)
+    model_kwargs = dict(temperature=temperature, top_p=top_p, do_sample=sample)
 
     pipeline = hf_pipeline(
         task="text-generation",
@@ -168,6 +168,11 @@ def main(
         batch_size=batch_size,
         dataset_split=dataset_split,
         dataset_outdir=dataset_outdir,
+        max_length=max_length,
+        temperature=temperature,
+        top_p=top_p,
+        num_return_sequences=num_return_sequences,
+        sample=sample,
     )
     task_runner = load_task(task, task_kwargs)
     task_runner.run()

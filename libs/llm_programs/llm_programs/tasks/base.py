@@ -18,10 +18,14 @@ class BaseTask(BaseModel, ABC):
     dataset_outdir: str
     instruct_model_id: str
     llm: BaseLanguageModel = Field(exclude=True)  # exclude from serialization
+    max_length: int
     num_examples: int
+    num_return_sequences: int
     prompt_template_type: PromptTemplateType
     prompt: BasePrompt
     streaming: bool = False
+    temperature: float
+    top_p: float
     verbose: bool = False
 
     def llmchain(self):
