@@ -1,3 +1,13 @@
+# 2023-11-12
+
+* Test different decoding strategies: 
+  * Greedy
+  * Beam Search
+  * Random Sampling
+  * Random Sampling with Temperature
+  * Top K Sampling
+  * Nucleaus Sampling
+
 # 2023-11-08
 
 Working hypothesis: For the GSM8K benchmark task, LLAMA-2-7b-chat-hf will perform worse than OpenAI text-davinci-002 as the reasoning engine in an Automatic multi-step reasoning (ART) LLM architechture.

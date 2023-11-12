@@ -27,8 +27,30 @@ class BatchedHuggingFacePipeline(HuggingFacePipeline):
     ) -> LLMResult:
         prompts = Dataset.from_dict({"prompt": prompts})
 
-        for out in tqdm(self.pipeline(KeyDataset(prompts, "prompt"), batch_size=self.batch_size), total=len(prompts)):
-            print(out)
+        text_generations: List[str] = []
+
+        for out in tqdm(
+            self.pipeline(KeyDataset(prompts, "prompt"), batch_size=self.batch_size, return_full_text=False),
+            total=len(prompts),
+        ):
+            text_generations.append(out[0]["generated_text"])
+            # try:
+            #     from transformers.pipelines.text_generation import ReturnType
+
+            #     remove_prompt = (
+            #         self.pipeline._postprocess_params.get("return_type")
+            #         != ReturnType.NEW_TEXT
+            #     )
+            # except Exception as e:
+            #     logger.warning(
+            #         f"Unable to extract pipeline return_type. "
+            #         f"Received error:\n\n{e}"
+            #     )
+            #     remove_prompt = True
+            # if remove_prompt:
+            #     text = out["generated_text"]
+            # else:
+            #     text = response["generated_text"]
 
         # for i in range(0, len(prompts), self.batch_size):
         #     batch_prompts = prompts[i : i + self.batch_size]
@@ -75,4 +97,4 @@ class BatchedHuggingFacePipeline(HuggingFacePipeline):
         #         # Append the processed text to results
         #         text_generations.append(text)
 
-        return LLMResult(generations=[[Generation(text=row["text_generations"])] for row in responses])
+        return LLMResult(generations=[[Generation(text=text)] for text in text_generations])

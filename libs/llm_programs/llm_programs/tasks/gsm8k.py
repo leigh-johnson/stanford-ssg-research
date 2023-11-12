@@ -4,7 +4,7 @@ import evaluate
 
 class Gsm8kTask(BaseTask):
     dataset = "gsm8k"
-    revision = "be45a9e2ae111e0cbfd91a7028f8de6aa80bc9a5"
+    dataset_revision = "main"
 
     def calc_perplexity(self, batch):
         perplexity = evaluate.load("perplexity", module_type="metric")
@@ -22,10 +22,8 @@ class Gsm8kTask(BaseTask):
         return batch
 
     def calc_accuracy(self, row):
-        results = []
-
         expected = self.prompt.parse_final_answer(row["answer"])
-        final_answer = row[self.prompt_template_type].split("\n")[-1]
+        final_answer = row[self.prompt_template_type.value].split("\n")[-1]
         hit = expected in final_answer
 
         row[f"{self.prompt_template_type.value}__accuracy"] = hit
@@ -42,9 +40,8 @@ class Gsm8kTask(BaseTask):
         if self.batch_size > 1:
             llmchain = self.llmchain()
             results = llmchain.batch(dataset, batch_size=self.batch_size)
-            dataset[self.prompt_template_type.value] = results
-            dataset = dataset.map(self.calc_accuracy, desc="Calculating Accuracy")
-            return dataset
+            dataset = dataset.add_column(self.prompt_template_type.value, results)
+            return dataset.map(self.calc_accuracy, desc="Calculating Accuracy")
         else:
             return dataset.map(self.score_row, desc="Scoring")
 

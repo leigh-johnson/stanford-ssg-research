@@ -1,8 +1,11 @@
 import json
+import os
 from abc import ABC, abstractmethod
 import datasets
 
-from langchain.pydantic_v1 import BaseModel
+from langchain.pydantic_v1 import BaseModel, Field
+from pydantic.v1.json import pydantic_encoder
+
 from langchain.schema.language_model import BaseLanguageModel
 from llm_programs.prompts.base import PromptTemplateType, BasePrompt
 
@@ -14,7 +17,7 @@ class BaseTask(BaseModel, ABC):
     dataset_split: str
     dataset_outdir: str
     instruct_model_id: str
-    llm: BaseLanguageModel
+    llm: BaseLanguageModel = Field(exclude=True)  # exclude from serialization
     num_examples: int
     prompt_template_type: PromptTemplateType
     prompt: BasePrompt
@@ -30,6 +33,7 @@ class BaseTask(BaseModel, ABC):
             self.dataset,
             self.dataset_revision,
             streaming=self.streaming,
+            split=self.dataset_split,
         )
 
     @abstractmethod
@@ -47,15 +51,19 @@ class BaseTask(BaseModel, ABC):
     def score(self, batch):
         pass
 
-    def save_task_conf(self):
-        conf = json.dumps(self)
+    def save_params(self):
+        filename = os.path.join(self.dataset_outdir, "params.json")
+        with open(filename, "w+", encoding="utf-8") as f:
+            json.dump(self, f, indent=4, default=pydantic_encoder)
+        print(f"Wrote params to {filename}")
 
     def run(self):
         dataset = self.load_dataset()
-        dataset = dataset[self.dataset_split]
         dataset = self.score(dataset)
         # dataset = dataset.map(self.score, desc="Scoring")
         dataset.save_to_disk(self.dataset_outdir)
+        self.save_params()
+
         # .map(self.score_batch, batch_size=self.batch_size, batched=True)
 
         # llmchain = self.llmchain()

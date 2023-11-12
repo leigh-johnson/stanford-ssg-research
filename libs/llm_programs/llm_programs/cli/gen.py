@@ -55,7 +55,7 @@ from llm_programs.llms.huggingface_pipeline import BatchedHuggingFacePipeline
 @click.option(
     "--num-return-sequences",
     type=int,
-    default=4,
+    default=1,
     help="The number of highest-scoring beams that should be returned when using beam search, see: https://huggingface.co/blog/how-to-generate",
 )
 @click.option(
@@ -105,7 +105,7 @@ def main(
     os.environ["HF_DATASETS_CACHE"] = cache_dir
 
     now = int(datetime.now().timestamp())
-    dataset_outdir = f"{cache_dir}/experiments/{task}_{instruct_model}_{prompt_template}_{now}/"
+    dataset_outdir = f"{cache_dir}/experiments/{task}_{instruct_model}_{prompt_template.value}_{now}/"
 
     if verbose:
         set_debug(True)
@@ -130,7 +130,7 @@ def main(
         task="text-generation",
         model=instruct_model,
         device_map="auto",
-        torch_dtype=torch.float16,
+        torch_dtype=torch.bfloat16,
         batch_size=batch_size,
         model_kwargs=model_kwargs,
         tokenizer=tokenizer,
