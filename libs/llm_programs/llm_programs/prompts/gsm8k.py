@@ -9,8 +9,8 @@ ANSWER_TOKEN = "####"  # indictates the final answer in ground truth
 DATA = {
     "id": "gsm8k",
     "name": "Middle school arithmetic problems",
-    "task_description": "Answer the following middle school math word problems, which require multi-step arithmetic reasoning.",
-    "task_description_cot": "Answer the following middle school math word problems, which require multi-step arithmetic reasoning. Let's think step-by-step.",
+    "task_description": "Answer the following middle school math word problem.",
+    "task_description_cot": "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning. Let's think step-by-step.",
     "task_description_with_tools": "(Grade school math) Solve the following middle-school arithmetic problems, writing out intermediate arithmetic calculations as python code. Store your result as a variable named 'ans'.",
     "examples_with_thoughts": [
         {
@@ -126,9 +126,6 @@ Q4: [EOQ]""",
 # Return a callable here
 # If these are instantiated as singletons, they leak stake
 
-DIRECT_PROMPT_TASK_DESCRIPTION = (
-    "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning."
-)
 
 ZERO_SHOT_DIRECT_PROMPT_TEMPLATE = PromptTemplate(
     partial_variables=dict(),
@@ -175,19 +172,29 @@ class Gsm8kPrompt(BasePrompt):
 
     def task_description(self) -> str:
         if self.prompt_template_type is PromptTemplateType.ZERO_SHOT_DIRECT:
-            return DIRECT_PROMPT_TASK_DESCRIPTION
+            return DATA["task_description"]
+        elif self.prompt_template_type is PromptTemplateType.FEW_SHOT_AUTO_COT:
+            return DATA["task_description_cot"]
         raise NotImplementedError(
-            f"Task description for {self.prompt_template_type} is not yet implemented, please add to promots/gsm8k.py"
+            f"Task description for {self.prompt_template_type} is not yet implemented, please add to prompts/gsm8k.py"
         )
 
-    def zero_shot_direct_prompt(self) -> BasePromptTemplate:
+    def zero_shot_cot_prompt(self) -> BasePromptTemplate:
         return PromptTemplate(
+            validate_template=True,
             partial_variables={"task_description": self.task_description()},
             input_variables=["question"],
             template="""{task_description}
 Question: {question}
-Answer:
-""",
+Answer:""",
+        )
+
+    def zero_shot_direct_prompt(self) -> BasePromptTemplate:
+        return PromptTemplate(
+            validate_template=True,
+            input_variables=["question"],
+            template="""Question: {question}
+Answer:""",
         )
 
 
