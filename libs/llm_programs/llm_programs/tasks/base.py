@@ -1,3 +1,4 @@
+import json
 from abc import ABC, abstractmethod
 import datasets
 
@@ -7,16 +8,17 @@ from llm_programs.prompts.base import PromptTemplateType, BasePrompt
 
 
 class BaseTask(BaseModel, ABC):
-    batch_size: int = 1
-    dataset_revision: str = "main"
+    batch_size: int
+    dataset_revision: str
     dataset: str
-    dataset_split: str = "test"
+    dataset_split: str
+    dataset_outdir: str
     instruct_model_id: str
     llm: BaseLanguageModel
-    num_examples: int = 0
+    num_examples: int
     prompt_template_type: PromptTemplateType
     prompt: BasePrompt
-    streaming: bool = True
+    streaming: bool = False
     verbose: bool = False
 
     def llmchain(self):
@@ -45,14 +47,19 @@ class BaseTask(BaseModel, ABC):
     def score(self, batch):
         pass
 
+    def save_task_conf(self):
+        conf = json.dumps(self)
+
     def run(self):
         dataset = self.load_dataset()
         dataset = dataset[self.dataset_split]
-        dataset = dataset.map(self.score)
+        dataset = self.score(dataset)
+        # dataset = dataset.map(self.score, desc="Scoring")
+        dataset.save_to_disk(self.dataset_outdir)
         # .map(self.score_batch, batch_size=self.batch_size, batched=True)
 
         # llmchain = self.llmchain()
         # response = llmchain.batch(dataset, return_exceptions=True)
-        for item in dataset:
-            print(item)
-            print("*****")
+        # for item in dataset:
+        #     print(item)
+        #     print("*****")

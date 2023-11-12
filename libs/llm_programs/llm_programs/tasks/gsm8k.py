@@ -31,13 +31,22 @@ class Gsm8kTask(BaseTask):
         row[f"{self.prompt_template_type.value}__accuracy"] = hit
         return row
 
-    def score(self, row):
+    def score_row(self, row):
         llmchain = self.llmchain()
         response = llmchain.invoke(row)
         row[self.prompt_template_type.value] = response
         row = self.calc_accuracy(row)
-        # batch = self.calc_batch_perplexity(batch)
         return row
+
+    def score(self, dataset):
+        if self.batch_size > 1:
+            llmchain = self.llmchain()
+            results = llmchain.batch(dataset, batch_size=self.batch_size)
+            dataset[self.prompt_template_type.value] = results
+            dataset = dataset.map(self.calc_accuracy, desc="Calculating Accuracy")
+            return dataset
+        else:
+            return dataset.map(self.score_row, desc="Scoring")
 
 
 TASK = Gsm8kTask

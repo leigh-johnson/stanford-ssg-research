@@ -9,6 +9,7 @@ from langchain.globals import set_debug, set_verbose
 
 from llm_programs.prompts.base import PromptTemplateType
 from llm_programs.tasks import load_task
+from llm_programs.llms.huggingface_pipeline import BatchedHuggingFacePipeline
 
 
 @click.command()
@@ -42,7 +43,7 @@ from llm_programs.tasks import load_task
 @click.option(
     "--max-length",
     type=int,
-    default=2048,
+    default=4096,
     help="https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig.max_new_tokens",
 )
 @click.option(
@@ -104,13 +105,18 @@ def main(
     os.environ["HF_DATASETS_CACHE"] = cache_dir
 
     now = int(datetime.now().timestamp())
-    output_dir = f"{cache_dir}/experiments/{task}_{instruct_model}_{prompt_template}_{now}/"
+    dataset_outdir = f"{cache_dir}/experiments/{task}_{instruct_model}_{prompt_template}_{now}/"
 
     if verbose:
         set_debug(True)
         set_verbose(True)
 
     tokenizer = AutoTokenizer.from_pretrained(instruct_model)
+
+    # ref: https://discuss.huggingface.co/t/llama2-pad-token-for-batched-inference/48020
+    if batch_size > 1:
+        tokenizer.pad_token = tokenizer.bos_token
+        tokenizer.padding_side = "left"
 
     pipeline_kwargs = dict(
         max_length=max_length,
@@ -127,20 +133,30 @@ def main(
         torch_dtype=torch.float16,
         batch_size=batch_size,
         model_kwargs=model_kwargs,
+        tokenizer=tokenizer,
+        num_return_sequences=num_return_sequences,
     )
-
-    pipeline.tokenizer.pad_token_id = pipeline.model.config.eos_token_id
 
     metadata = dict(num_examples=num_examples, prompt_template_type=prompt_template)
 
-    llm = HuggingFacePipeline(
-        pipeline=pipeline,
-        model_id=instruct_model,
-        batch_size=batch_size,
-        pipeline_kwargs=pipeline_kwargs,
-        model_kwargs=model_kwargs,
-        metadata=metadata,
-    )
+    if batch_size > 1:
+        llm = BatchedHuggingFacePipeline(
+            pipeline=pipeline,
+            model_id=instruct_model,
+            batch_size=batch_size,
+            pipeline_kwargs=pipeline_kwargs,
+            model_kwargs=model_kwargs,
+            metadata=metadata,
+        )
+    else:
+        llm = HuggingFacePipeline(
+            pipeline=pipeline,
+            model_id=instruct_model,
+            batch_size=batch_size,
+            pipeline_kwargs=pipeline_kwargs,
+            model_kwargs=model_kwargs,
+            metadata=metadata,
+        )
     print(f"Loaded instruct model: {instruct_model}")
 
     task_kwargs = dict(
@@ -151,6 +167,7 @@ def main(
         instruct_model_id=instruct_model,
         batch_size=batch_size,
         dataset_split=dataset_split,
+        dataset_outdir=dataset_outdir,
     )
     task_runner = load_task(task, task_kwargs)
     task_runner.run()
