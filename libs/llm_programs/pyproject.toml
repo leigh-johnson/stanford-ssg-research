@@ -8,7 +8,7 @@ packages = [{ include = "llm_programs" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-transformers = { extras = ["torch"], version = "^4.34.0" }
+transformers = "^4.35.0"
 click = "^8.1.7"
 pydantic = "^2.4.2"
 sentencepiece = "^0.1.99"
@@ -26,12 +26,13 @@ nvidia-cuda-nvcc-cu12 = "^12.2.140"
 nvidia-cuda-opencl-cu12 = "^12.2.140"
 nvidia-nccl-cu12 = "^2.18.3"
 nvidia-nvtx-cu12 = "^12.2.140"
-datasets = "^2.14.5"
-accelerate = "^0.24.0"
+datasets = "^2.14.6"
+accelerate = "^0.24.1"
 notebook = "^7.0.6"
 ipywidgets = "^8.1.1"
-langchain = "^0.0.325"
+langchain = "^0.0.334"
 evaluate = "^0.4.1"
+tqdm = "^4.66.1"
 
 [build-system]
 requires = ["poetry-core"]
