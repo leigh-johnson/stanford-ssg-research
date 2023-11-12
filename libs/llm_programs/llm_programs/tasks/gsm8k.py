@@ -6,7 +6,7 @@ class Gsm8kTask(BaseTask):
     dataset = "gsm8k"
     revision = "be45a9e2ae111e0cbfd91a7028f8de6aa80bc9a5"
 
-    def calc_batch_perplexity(self, batch):
+    def calc_perplexity(self, batch):
         perplexity = evaluate.load("perplexity", module_type="metric")
 
         batch["perplexity_questions"] = perplexity.compute(
@@ -21,33 +21,23 @@ class Gsm8kTask(BaseTask):
 
         return batch
 
-    def calc_batch_accuracy(self, batch):
+    def calc_accuracy(self, row):
         results = []
 
-        for i in range(self.batch_size):
-            expected = self.prompt.parse_final_answer(batch["answer"][i])
-            hit = expected in batch["response"][i]
-            results.append(hit)
+        expected = self.prompt.parse_final_answer(row["answer"])
+        final_answer = row[self.prompt_template_type].split("\n")[-1]
+        hit = expected in final_answer
 
-        batch["accuracy"] = results
-        return batch
+        row[f"{self.prompt_template_type.value}__accuracy"] = hit
+        return row
 
-    def score_batch(self, batch):
-        if self.batch_size == 1:
-            transformed_batch = [batch]
-
-        else:
-            transformed_batch = [
-                {"question": batch["question"][i], "answer": batch["answer"][i]} for i in range(0, self.batch_size)
-            ]
+    def score(self, row):
         llmchain = self.llmchain()
-        response = llmchain.batch(transformed_batch)
-        print("Prediction:", response)
-        print("*****")
-        batch["response"] = response
-        batch = self.calc_batch_accuracy(batch)
+        response = llmchain.invoke(row)
+        row[self.prompt_template_type.value] = response
+        row = self.calc_accuracy(row)
         # batch = self.calc_batch_perplexity(batch)
-        return batch
+        return row
 
 
 TASK = Gsm8kTask

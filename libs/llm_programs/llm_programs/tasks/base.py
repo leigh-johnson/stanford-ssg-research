@@ -10,6 +10,7 @@ class BaseTask(BaseModel, ABC):
     batch_size: int = 1
     dataset_revision: str = "main"
     dataset: str
+    dataset_split: str = "test"
     instruct_model_id: str
     llm: BaseLanguageModel
     num_examples: int = 0
@@ -30,25 +31,28 @@ class BaseTask(BaseModel, ABC):
         )
 
     @abstractmethod
-    def calc_batch_accuracy(self, batch):
+    def calc_accuracy(self, batch):
         pass
 
     @abstractmethod
-    def calc_batch_perplexity(self, batch):
+    def calc_perplexity(self, batch):
         pass
 
-    def calc_batch_ptest(self):
+    def calc_ptest(self):
         pass
 
     @abstractmethod
-    def score_batch(self, batch):
+    def score(self, batch):
         pass
 
     def run(self):
         dataset = self.load_dataset()
-        dataset = dataset["test"].map(self.score_batch, batch_size=self.batch_size, batched=True)
-        dataset = dataset.map(self.score_batch, batch_size=self.batch_size, batched=True)
+        dataset = dataset[self.dataset_split]
+        dataset = dataset.map(self.score)
+        # .map(self.score_batch, batch_size=self.batch_size, batched=True)
 
-        for batch in iter(dataset):
-            print(batch)
+        # llmchain = self.llmchain()
+        # response = llmchain.batch(dataset, return_exceptions=True)
+        for item in dataset:
+            print(item)
             print("*****")

@@ -1,7 +1,7 @@
 import click
 import os
 import torch
-
+from datetime import datetime
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from transformers import pipeline as hf_pipeline
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
@@ -22,6 +22,7 @@ from llm_programs.tasks import load_task
     ),
     default="WizardLM/WizardCoder-Python-13B-V1.0",
 )
+@click.option("--dataset-split", type=str, default="test")
 @click.option(
     "--instruct-model",
     type=click.Choice(
@@ -41,7 +42,7 @@ from llm_programs.tasks import load_task
 @click.option(
     "--max-length",
     type=int,
-    default=512,
+    default=2048,
     help="https://huggingface.co/docs/transformers/main_classes/text_generation#transformers.GenerationConfig.max_new_tokens",
 )
 @click.option(
@@ -53,7 +54,7 @@ from llm_programs.tasks import load_task
 @click.option(
     "--num-return-sequences",
     type=int,
-    default=1,
+    default=4,
     help="The number of highest-scoring beams that should be returned when using beam search, see: https://huggingface.co/blog/how-to-generate",
 )
 @click.option(
@@ -68,11 +69,24 @@ from llm_programs.tasks import load_task
     help="Sample first N records in task dataset. If -1, all available samples will be used.",
 )
 @click.option("--task", type=click.Choice(["gsm8k"], case_sensitive=False))
+@click.option(
+    "--temperature",
+    type=float,
+    default=0.6,
+    help="The temperature is a parameter that controls the randomness of the LLM's output. A higher temperature will result in more creative and imaginative text, while a lower temperature will result in more accurate and factual text.",
+)
+@click.option(
+    "--top-p",
+    type=float,
+    default=0.9,
+    help="Nucleus sampling threshold",
+)
 @click.option("--verbose", is_flag=True, default=False)
 def main(
     batch_size: int,
     cache_dir: str,
     code_model: str,
+    dataset_split: str,
     instruct_model: str,
     math_model: str,
     max_length: int,
@@ -81,11 +95,16 @@ def main(
     prompt_template: str,
     sample: int,
     task: str,
+    temperature: float,
+    top_p: float,
     verbose: bool,
 ):
     """Benchmark llm_programs against a task"""
     os.environ["TRANSFORMERS_CACHE"] = cache_dir
     os.environ["HF_DATASETS_CACHE"] = cache_dir
+
+    now = int(datetime.now().timestamp())
+    output_dir = f"{cache_dir}/experiments/{task}_{instruct_model}_{prompt_template}_{now}/"
 
     if verbose:
         set_debug(True)
@@ -99,12 +118,18 @@ def main(
         eos_token_id=tokenizer.eos_token_id,
     )
 
+    model_kwargs = dict(temperature=temperature, top_p=top_p, do_sample=True)
+
     pipeline = hf_pipeline(
         task="text-generation",
         model=instruct_model,
         device_map="auto",
         torch_dtype=torch.float16,
+        batch_size=batch_size,
+        model_kwargs=model_kwargs,
     )
+
+    pipeline.tokenizer.pad_token_id = pipeline.model.config.eos_token_id
 
     metadata = dict(num_examples=num_examples, prompt_template_type=prompt_template)
 
@@ -113,6 +138,7 @@ def main(
         model_id=instruct_model,
         batch_size=batch_size,
         pipeline_kwargs=pipeline_kwargs,
+        model_kwargs=model_kwargs,
         metadata=metadata,
     )
     print(f"Loaded instruct model: {instruct_model}")
@@ -123,6 +149,8 @@ def main(
         llm=llm,
         verbose=verbose,
         instruct_model_id=instruct_model,
+        batch_size=batch_size,
+        dataset_split=dataset_split,
     )
     task_runner = load_task(task, task_kwargs)
     task_runner.run()
