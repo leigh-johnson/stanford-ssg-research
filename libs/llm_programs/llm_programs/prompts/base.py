@@ -41,7 +41,7 @@ class BasePrompt(BaseModel, ABC):
         pass
 
     @abstractmethod
-    def few_shot_cot_prompt(self, task_description="") -> BasePromptTemplate:
+    def few_shot_cot_prompt(self, num_examples: int, task_description="") -> BasePromptTemplate:
         pass
 
     def get_prompt(self, **kwargs) -> BasePromptTemplate:
