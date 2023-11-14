@@ -179,6 +179,30 @@ class Gsm8kPrompt(BasePrompt):
             f"Task description for {self.prompt_template_type} is not yet implemented, please add to prompts/gsm8k.py"
         )
 
+    def few_shot_cot_prompt(self, num_examples: int) -> BasePromptTemplate:
+        examples = []
+        for i in range(0, num_examples):
+            example_q = DATA["examples_with_thoughts"][i]["input"]
+            example_t = DATA["examples_with_thoughts"][i]["thoughts"]
+            example_a = DATA["examples_with_thoughts"][i]["answer"]
+            example = f"""Question: {example_q}
+Answer: Let's think step-by-step.
+{example_t}
+Final Answer: {example_a}
+"""
+            examples.push(example)
+        examples = examples.join("\n")
+        return PromptTemplate(
+            validate_template=True,
+            partial_variables={"task_description": self.task_description()},
+            input_variables=["question"],
+            template="""{task_description}
+{examples}
+Question: {question}
+Answer: Let's think step-by-step.
+""",
+        )
+
     def zero_shot_cot_prompt(self) -> BasePromptTemplate:
         return PromptTemplate(
             validate_template=True,

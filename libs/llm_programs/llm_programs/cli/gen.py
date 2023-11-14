@@ -105,7 +105,9 @@ def main(
     os.environ["HF_DATASETS_CACHE"] = cache_dir
 
     now = int(datetime.now().timestamp())
-    dataset_outdir = f"{cache_dir}/experiments/{task}_{instruct_model}_{prompt_template.value}_{now}/"
+    dataset_outdir = (
+        f"{cache_dir}/experiments/{task}_{instruct_model}_{prompt_template.value}_num_examples={num_examples}_{now}/"
+    )
 
     if verbose:
         set_debug(True)
