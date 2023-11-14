@@ -23,6 +23,7 @@ class BaseTask(BaseModel, ABC):
     num_return_sequences: int
     prompt_template_type: PromptTemplateType
     prompt: BasePrompt
+    sample: bool
     streaming: bool = False
     temperature: float
     top_p: float
