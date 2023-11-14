@@ -51,7 +51,7 @@ class BasePrompt(BaseModel, ABC):
             if self.num_examples == 0:
                 return self.zero_shot_cot_prompt()
             else:
-                return self.few_shot_cot_prompt()
+                return self.few_shot_cot_prompt(self.num_examples)
         raise NotImplementedError(
             f"BasePromptSelector.get_prompt is not yet implemented for {self.prompt_template_type}"
         )

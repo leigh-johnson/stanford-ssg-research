@@ -190,11 +190,11 @@ Answer: Let's think step-by-step.
 {example_t}
 Final Answer: {example_a}
 """
-            examples.push(example)
-        examples = examples.join("\n")
+            examples.append(example)
+        examples = "\n".join(examples)
         return PromptTemplate(
             validate_template=True,
-            partial_variables={"task_description": self.task_description()},
+            partial_variables={"task_description": self.task_description(), "examples": examples},
             input_variables=["question"],
             template="""{task_description}
 {examples}
