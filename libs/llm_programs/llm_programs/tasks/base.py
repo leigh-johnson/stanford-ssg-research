@@ -66,6 +66,12 @@ class BaseTask(BaseModel, ABC):
         dataset = self.load_dataset()
         dataset = self.score(dataset)
         # dataset = dataset.map(self.score, desc="Scoring")
+        for item in dataset:
+            import pdb
+
+            pdb.set_trace()
+            print("****")
+            print(item)
         dataset.save_to_disk(self.dataset_outdir)
         self.save_params()
 

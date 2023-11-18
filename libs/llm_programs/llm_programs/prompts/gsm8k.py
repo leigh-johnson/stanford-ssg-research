@@ -11,7 +11,7 @@ DATA = {
     "name": "Middle school arithmetic problems",
     "task_description": "Answer the following middle school math word problem.",
     "task_description_cot": "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning. Let's think step-by-step.",
-    "task_description_with_tools": "(Grade school math) Solve the following middle-school arithmetic problems, writing out intermediate arithmetic calculations as python code. Store your result as a variable named 'ans'.",
+    "task_description_with_tools": "(Grade school math) Solve the following middle-school arithmetic problems, writing out intermediate arithmetic calculations as python code. Store your result as a variable named 'ans' and print(ans) as the final step.",
     "examples_with_thoughts": [
         {
             "input": "Mason is cleaning out all the junk in his attic. 20% of the items are useful, 10% are valuable heirlooms, and 70% are junk. If Mason's attic has 8 useful items in it, how many junk items does it have?",
@@ -230,8 +230,7 @@ Answer:""",
             partial_variables={"task_description": self.task_description()},
             input_variables=["question"],
             template="""{task_description}
-Question: {question}
-Answer:""",
+Question: {question}""",
         )
 
     def few_shot_program_prompt(self, num_examples: int, task_description="") -> BasePromptTemplate:

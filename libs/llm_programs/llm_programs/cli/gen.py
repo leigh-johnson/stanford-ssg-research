@@ -98,10 +98,8 @@ def main(
     tokenizer = AutoTokenizer.from_pretrained(instruct_model)
 
     # ref: https://discuss.huggingface.co/t/llama2-pad-token-for-batched-inference/48020
-    if batch_size > 1 and "Llama-2" in instruct_model:
-        tokenizer.pad_token = tokenizer.bos_token
-        tokenizer.padding_side = "left"
-    elif batch_size > 1 and "codellama" in instruct_model:
+
+    if batch_size > 1:
         tokenizer.pad_token = tokenizer.bos_token
         tokenizer.padding_side = "left"
 
@@ -111,7 +109,18 @@ def main(
         eos_token_id=tokenizer.eos_token_id,
     )
 
+    # https://huggingface.co/docs/transformers/main/model_doc/llama#transformers.LlamaForCausalLM
+    # model_kwargs are passed to LlamaForCausalLM.from_pretrained
+    # These override config.json values: https://huggingface.co/meta-llama/Llama-2-7b-chat-hf/blob/main/config.json
     model_kwargs = dict(temperature=temperature, top_p=top_p, do_sample=sample, max_length=max_length)
+
+    # generate kwargs are passed to $pipeline_instance.__call__ which is equivalent to $model.generate()
+    # These override generation_config.json values: https://huggingface.co/meta-llama/Llama-2-7b-chat-hf/blob/main/generation_config.json
+    pipeline_kwargs = dict(
+        max_length=max_length,
+        num_return_sequences=num_return_sequences,
+        eos_token_id=tokenizer.eos_token_id,
+    )
 
     pipeline = hf_pipeline(
         task="text-generation",
