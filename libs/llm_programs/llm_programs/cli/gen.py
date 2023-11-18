@@ -15,30 +15,14 @@ from llm_programs.llms.huggingface_pipeline import BatchedHuggingFacePipeline
 @click.command()
 @click.option("--batch-size", type=int, default=1)
 @click.option("--cache-dir", default="/mnt/spindle/stanford-ssg-research/.cache")
-@click.option(
-    "--code-model",
-    type=click.Choice(
-        ["WizardLM/WizardCoder-Python-13B-V1.0"],
-        case_sensitive=False,
-    ),
-    default="WizardLM/WizardCoder-Python-13B-V1.0",
-)
 @click.option("--dataset-split", type=str, default="test")
 @click.option(
     "--instruct-model",
     type=click.Choice(
-        ["meta-llama/Llama-2-7b-chat-hf"],
+        ["meta-llama/Llama-2-7b-chat-hf", "codellama/CodeLlama-7b-Instruct-hf"],
         case_sensitive=False,
     ),
     default="meta-llama/Llama-2-7b-chat-hf",
-)
-@click.option(
-    "--math-model",
-    type=click.Choice(
-        ["WizardLM/WizardMath-13B-V1.0"],
-        case_sensitive=False,
-    ),
-    default="WizardLM/WizardMath-13B-V1.0",
 )
 @click.option(
     "--max-length",
@@ -86,10 +70,8 @@ from llm_programs.llms.huggingface_pipeline import BatchedHuggingFacePipeline
 def main(
     batch_size: int,
     cache_dir: str,
-    code_model: str,
     dataset_split: str,
     instruct_model: str,
-    math_model: str,
     max_length: int,
     num_examples: int,
     num_return_sequences: int,
@@ -116,7 +98,10 @@ def main(
     tokenizer = AutoTokenizer.from_pretrained(instruct_model)
 
     # ref: https://discuss.huggingface.co/t/llama2-pad-token-for-batched-inference/48020
-    if batch_size > 1:
+    if batch_size > 1 and "Llama-2" in instruct_model:
+        tokenizer.pad_token = tokenizer.bos_token
+        tokenizer.padding_side = "left"
+    elif batch_size > 1 and "codellama" in instruct_model:
         tokenizer.pad_token = tokenizer.bos_token
         tokenizer.padding_side = "left"
 
@@ -126,13 +111,14 @@ def main(
         eos_token_id=tokenizer.eos_token_id,
     )
 
-    model_kwargs = dict(temperature=temperature, top_p=top_p, do_sample=sample)
+    model_kwargs = dict(temperature=temperature, top_p=top_p, do_sample=sample, max_length=max_length)
 
     pipeline = hf_pipeline(
         task="text-generation",
         model=instruct_model,
         device_map="auto",
         torch_dtype=torch.bfloat16,
+        # torch_dtype=torch.float16,
         batch_size=batch_size,
         model_kwargs=model_kwargs,
         tokenizer=tokenizer,

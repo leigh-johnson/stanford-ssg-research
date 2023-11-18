@@ -175,6 +175,9 @@ class Gsm8kPrompt(BasePrompt):
             return DATA["task_description"]
         elif self.prompt_template_type is PromptTemplateType.FEW_SHOT_AUTO_COT:
             return DATA["task_description_cot"]
+        elif self.prompt_template_type is PromptTemplateType.FEW_SHOT_PROGRAM:
+            return DATA["task_description_with_tools"]
+
         raise NotImplementedError(
             f"Task description for {self.prompt_template_type} is not yet implemented, please add to prompts/gsm8k.py"
         )
@@ -220,6 +223,19 @@ Answer:""",
             template="""Question: {question}
 Answer:""",
         )
+
+    def zero_shot_program_prompt(self, task_description="") -> BasePromptTemplate:
+        return PromptTemplate(
+            validate_template=True,
+            partial_variables={"task_description": self.task_description()},
+            input_variables=["question"],
+            template="""{task_description}
+Question: {question}
+Answer:""",
+        )
+
+    def few_shot_program_prompt(self, num_examples: int, task_description="") -> BasePromptTemplate:
+        raise NotImplementedError
 
 
 PROMPT = Gsm8kPrompt
