@@ -4,16 +4,17 @@ import re
 DOCKER_TAG = "python:3.11"
 
 
-def extract_python_code(row, input_column: str = "generated", output_column="program", regex=r"```$(.*)```"):
+def extract_python_code(row, input_column: str = "generated", output_column="program", regex="```(.*)```"):
     """
     Extracts python code between separator tokens: ```
     """
 
-    match = re.match(regex, row[input_column])
-    if match:
-        row[output_column] = match.group(0)
-    else:
+    match = re.search(regex, row[input_column], flags=re.DOTALL)
+
+    if match is None:
         row[output_column] = match
+    else:
+        row[output_column] = match.group(0).replace("```", "")
     return row
 
 

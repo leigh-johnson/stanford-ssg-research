@@ -12,7 +12,7 @@ DATA = {
     "name": "Middle school arithmetic problems",
     "task_description": "Answer the following middle school math word problem.",
     "task_description_cot": "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning. Let's think step-by-step.",
-    "task_description_with_tools": "(Grade school math) Solve the following middle-school arithmetic problems, writing out intermediate arithmetic calculations as python code. Store your result as a variable named 'ans' and print(ans) as the final step. Wrap code in ``` for readability.",
+    "task_description_with_program": "(Grade school math) Solve the following middle-school arithmetic problems, using Python code to solve intermediate arithmetic calculations. Wrap code in ``` for readability. Store your result as a variable named 'ans' and print(ans) as the final step.",
     "examples_with_thoughts": [
         {
             "input": "Mason is cleaning out all the junk in his attic. 20% of the items are useful, 10% are valuable heirlooms, and 70% are junk. If Mason's attic has 8 useful items in it, how many junk items does it have?",
@@ -105,7 +105,7 @@ Q4: [EOQ]""",
 # FEW_SHOT_TOOL_PROMPT_TEMPLATE = FewShotPromptTemplate(
 #     examples=DATA["examples_with_tools"],
 #     example_prompt=EXAMPLE_TOOL_PROMPT_TEMPLATE,
-#     prefix=DATA["task_description_with_tools"],
+#     prefix=DATA["task_description_with_program"],
 #     suffix="Question: {input}",
 #     input_variables=["input"],
 # )
@@ -177,7 +177,7 @@ class Gsm8kPrompt(BasePrompt):
         elif self.prompt_template_type is PromptTemplateType.COT:
             return DATA["task_description_cot"]
         elif self.prompt_template_type is PromptTemplateType.PROGRAM:
-            return DATA["task_description_with_tools"]
+            return DATA["task_description_with_program"]
 
         raise NotImplementedError(
             f"Task description for {self.prompt_template_type} is not yet implemented, please add to prompts/gsm8k.py"
