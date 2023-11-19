@@ -66,19 +66,8 @@ class BaseTask(BaseModel, ABC):
         dataset = self.load_dataset()
         dataset = self.score(dataset)
         # dataset = dataset.map(self.score, desc="Scoring")
-        for item in dataset:
-            import pdb
-
-            pdb.set_trace()
-            print("****")
-            print(item)
+        # for item in dataset:
+        #     import pdb
+        #     print(item)
         dataset.save_to_disk(self.dataset_outdir)
         self.save_params()
-
-        # .map(self.score_batch, batch_size=self.batch_size, batched=True)
-
-        # llmchain = self.llmchain()
-        # response = llmchain.batch(dataset, return_exceptions=True)
-        # for item in dataset:
-        #     print(item)
-        #     print("*****")
