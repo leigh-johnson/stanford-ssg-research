@@ -25,7 +25,7 @@ class BasePrompt(BaseModel, ABC):
 
     num_examples: int = 0
     prompt_template_type: PromptTemplateType
-    model: InstructModel
+    instruct_model: InstructModel
 
     @abstractmethod
     def parse_final_answer(self) -> str:

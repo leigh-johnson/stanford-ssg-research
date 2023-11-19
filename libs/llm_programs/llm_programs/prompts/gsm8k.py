@@ -226,7 +226,8 @@ Answer:""",
         )
 
     def zero_shot_program_prompt(self, task_description="") -> BasePromptTemplate:
-        if self.model in [InstructModel.CODELLAMA_7B_INSTRUCT_HF, InstructModel.CODELLAMA_7B_PYTHON_HF]:
+        if self.instruct_model in [InstructModel.CODELLAMA_7B_INSTRUCT_HF, InstructModel.CODELLAMA_7B_PYTHON_HF]:
+            # based on: https://huggingface.co/blog/codellama#conversational-instructions
             return PromptTemplate(
                 validate_template=True,
                 partial_variables={"task_description": self.task_description()},

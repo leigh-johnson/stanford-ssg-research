@@ -1,22 +1,23 @@
 import docker
-
-ILLEGAL_TOKENS = ["---"]
+import re
 
 DOCKER_TAG = "python:3.11"
 
 
-def clean_python_code(row, input_column: str = "generated", output_column="generated"):
-    command = row[input_column]
-    for token in ILLEGAL_TOKENS:
-        command = command.replace(token, "")
+def extract_python_code(row, input_column: str = "generated", output_column="program", regex=r"```$(.*)```"):
+    """
+    Extracts python code between separator tokens: ```
+    """
 
-    row[output_column] = command
+    match = re.match(row[input_column])
+    if match:
+        row[output_column] = match.group(0)
+    else:
+        row[output_column] = match
     return row
 
 
-def run_python_code(
-    row, input_column: str = "generated", output_column="program_output", error_column="program_error"
-):
+def run_python_code(row, input_column: str = "program", output_column="program_output", error_column="program_error"):
     command = ["python3", "-c", row[input_column]]
     client = docker.from_env()
     print("Running command: \n", command)

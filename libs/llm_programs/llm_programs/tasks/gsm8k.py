@@ -1,7 +1,7 @@
 from datasets import Dataset
 from llm_programs.tasks.base import BaseTask
 from llm_programs.prompts.base import PromptTemplateType
-from llm_programs.utils import clean_python_code, run_python_code
+from llm_programs.utils import extract_python_code, run_python_code
 import evaluate
 
 
@@ -10,6 +10,7 @@ class Gsm8kTask(BaseTask):
     dataset_revision = "main"
 
     generated_column = "generated"
+    program_column = "program"
     program_output_column = "program_output"
     program_error_column = "program_error"
 
@@ -41,7 +42,7 @@ class Gsm8kTask(BaseTask):
         llmchain = self.llmchain()
         response = llmchain.invoke(row)
         row[self.generated_column] = response
-        row = clean_python_code(row)
+        row = extract_python_code(row)
         row = run_python_code(row)
         return row
 
@@ -58,7 +59,7 @@ class Gsm8kTask(BaseTask):
             llmchain = self.llmchain()
             results = llmchain.batch(dataset, batch_size=self.batch_size)
             dataset = dataset.add_column(self.generated_column, results)
-            dataset = dataset.map(clean_python_code)
+            dataset = dataset.map(extract_python_code)
             dataset = dataset.map(run_python_code)
             return dataset
         else:
