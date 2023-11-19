@@ -8,6 +8,7 @@ from pydantic.v1.json import pydantic_encoder
 
 from langchain.schema.language_model import BaseLanguageModel
 from llm_programs.prompts.base import PromptTemplateType, BasePrompt
+from llm_programs.models import InstructModel
 
 
 class BaseTask(BaseModel, ABC):
@@ -16,7 +17,7 @@ class BaseTask(BaseModel, ABC):
     dataset: str
     dataset_split: str
     dataset_outdir: str
-    instruct_model_id: str
+    instruct_model: InstructModel
     llm: BaseLanguageModel = Field(exclude=True)  # exclude from serialization
     max_length: int
     num_examples: int
@@ -66,8 +67,9 @@ class BaseTask(BaseModel, ABC):
         dataset = self.load_dataset()
         dataset = self.score(dataset)
         # dataset = dataset.map(self.score, desc="Scoring")
-        # for item in dataset:
-        #     import pdb
-        #     print(item)
+        for item in dataset:
+            import pdb
+
+            print(item)
         dataset.save_to_disk(self.dataset_outdir)
         self.save_params()

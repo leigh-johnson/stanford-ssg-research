@@ -3,6 +3,7 @@ from langchain.prompts.prompt import PromptTemplate
 from langchain.schema.prompt_template import BasePromptTemplate
 
 from llm_programs.prompts.base import BasePrompt, PromptTemplateType
+from llm_programs.models import InstructModel
 
 ANSWER_TOKEN = "####"  # indictates the final answer in ground truth
 
@@ -11,7 +12,7 @@ DATA = {
     "name": "Middle school arithmetic problems",
     "task_description": "Answer the following middle school math word problem.",
     "task_description_cot": "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning. Let's think step-by-step.",
-    "task_description_with_tools": "(Grade school math) Solve the following middle-school arithmetic problems, writing out intermediate arithmetic calculations as python code. Store your result as a variable named 'ans' and print(ans) as the final step.",
+    "task_description_with_tools": "(Grade school math) Solve the following middle-school arithmetic problems, writing out intermediate arithmetic calculations as python code. Store your result as a variable named 'ans' and print(ans) as the final step. Wrap code in ``` for readability.",
     "examples_with_thoughts": [
         {
             "input": "Mason is cleaning out all the junk in his attic. 20% of the items are useful, 10% are valuable heirlooms, and 70% are junk. If Mason's attic has 8 useful items in it, how many junk items does it have?",
@@ -225,13 +226,18 @@ Answer:""",
         )
 
     def zero_shot_program_prompt(self, task_description="") -> BasePromptTemplate:
-        return PromptTemplate(
-            validate_template=True,
-            partial_variables={"task_description": self.task_description()},
-            input_variables=["question"],
-            template="""{task_description}
-Question: {question}""",
-        )
+        if self.model in [InstructModel.CODELLAMA_7B_INSTRUCT_HF, InstructModel.CODELLAMA_7B_PYTHON_HF]:
+            return PromptTemplate(
+                validate_template=True,
+                partial_variables={"task_description": self.task_description()},
+                input_variables=["question"],
+                template="""<s>[INST] <<SYS>>
+{task_description}
+<</SYS>>
+{question}
+[/INST]""",
+            )
+        raise NotImplementedError
 
     def few_shot_program_prompt(self, num_examples: int, task_description="") -> BasePromptTemplate:
         raise NotImplementedError
