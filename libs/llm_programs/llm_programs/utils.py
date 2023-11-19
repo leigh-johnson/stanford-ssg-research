@@ -21,7 +21,6 @@ def extract_python_code(row, input_column: str = "generated", output_column="pro
 def run_python_code(row, input_column: str = "program", output_column="program_output", error_column="program_error"):
     command = ["python3", "-c", row[input_column]]
     client = docker.from_env()
-    print("Running command: \n", command)
     try:
         result = client.containers.run(DOCKER_TAG, command=command, remove=True)
         row[output_column] = result.decode("utf8")
