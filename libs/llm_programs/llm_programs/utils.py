@@ -14,10 +14,17 @@ def clean_python_code(row, input_column: str = "generated", output_column="gener
     return row
 
 
-def run_python_code(row, input_column: str = "generated", output_column="program_output"):
+def run_python_code(
+    row, input_column: str = "generated", output_column="program_output", error_column="program_error"
+):
     command = ["python3", "-c", row[input_column]]
     client = docker.from_env()
     print("Running command: \n", command)
-    result = client.containers.run(DOCKER_TAG, command=command, remove=True)
-    row[output_column] = result
+    try:
+        result = client.containers.run(DOCKER_TAG, command=command, remove=True)
+        row[output_column] = result
+        row[error_column] = False
+    except docker.errors.ContainerError as e:
+        row[output_column] = str(e)
+        row[error_column] = True
     return row
