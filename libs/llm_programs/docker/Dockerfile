@@ -1,5 +1,5 @@
 FROM python:3.11
 
-ADD run.sh /bin/exec-python
+# ADD run.sh /bin/exec-python
 
-ENTRYPOINT ["/bin/exec-python"]
+ENTRYPOINT ["/bin/python"]

@@ -127,7 +127,7 @@ Q4: [EOQ]""",
 # If these are instantiated as singletons, they leak stake
 
 
-ZERO_SHOT_DIRECT_PROMPT_TEMPLATE = PromptTemplate(
+DIRECT_PROMPT_TEMPLATE = PromptTemplate(
     partial_variables=dict(),
     input_variables=["question", "task_description"],
     template="""{task_description}
@@ -151,8 +151,8 @@ FEW_SHOT_DIRECT_PROMPT_TEMPLATE = FewShotPromptTemplate(
 
 
 # PROMPT_SELECTOR = ConditionalPromptSelector(
-#     default_prompt=ZERO_SHOT_DIRECT_PROMPT_TEMPLATE,
-#     conditionals=[(is_zero_shot_direct, ZERO_SHOT_DIRECT_PROMPT_TEMPLATE)],
+#     default_prompt=DIRECT_PROMPT_TEMPLATE,
+#     conditionals=[(is_zero_shot_direct, DIRECT_PROMPT_TEMPLATE)],
 # )
 
 
@@ -171,11 +171,11 @@ class Gsm8kPrompt(BasePrompt):
         return text.split(ANSWER_TOKEN)[-1].strip()
 
     def task_description(self) -> str:
-        if self.prompt_template_type is PromptTemplateType.ZERO_SHOT_DIRECT:
+        if self.prompt_template_type is PromptTemplateType.DIRECT:
             return DATA["task_description"]
-        elif self.prompt_template_type is PromptTemplateType.FEW_SHOT_AUTO_COT:
+        elif self.prompt_template_type is PromptTemplateType.COT:
             return DATA["task_description_cot"]
-        elif self.prompt_template_type is PromptTemplateType.FEW_SHOT_PROGRAM:
+        elif self.prompt_template_type is PromptTemplateType.PROGRAM:
             return DATA["task_description_with_tools"]
 
         raise NotImplementedError(
