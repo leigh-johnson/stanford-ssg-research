@@ -2,7 +2,7 @@ import click
 import os
 import torch
 from datetime import datetime
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer
 from transformers import pipeline as hf_pipeline
 from langchain.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain.globals import set_debug, set_verbose
@@ -10,6 +10,7 @@ from langchain.globals import set_debug, set_verbose
 from llm_programs.prompts.base import PromptTemplateType
 from llm_programs.tasks import load_task
 from llm_programs.llms.huggingface_pipeline import BatchedHuggingFacePipeline
+from llm_programs.models import InstructModel
 
 
 @click.command()
@@ -19,10 +20,10 @@ from llm_programs.llms.huggingface_pipeline import BatchedHuggingFacePipeline
 @click.option(
     "--instruct-model",
     type=click.Choice(
-        ["meta-llama/Llama-2-7b-chat-hf", "codellama/CodeLlama-7b-Instruct-hf"],
+        InstructModel,
         case_sensitive=False,
     ),
-    default="meta-llama/Llama-2-7b-chat-hf",
+    default=InstructModel.LLAMA2_7B_CHAT_HF,
 )
 @click.option(
     "--max-length",
@@ -87,32 +88,13 @@ def main(
     os.environ["HF_DATASETS_CACHE"] = cache_dir
 
     now = int(datetime.now().timestamp())
-    dataset_outdir = (
-        f"{cache_dir}/experiments/{task}_{instruct_model}_{prompt_template.value}_num_examples={num_examples}_{now}/"
-    )
+    dataset_outdir = f"{cache_dir}/experiments/{task}_{instruct_model.value}_{prompt_template.value}_num_examples={num_examples}_{now}/"
 
     if verbose:
         set_debug(True)
         set_verbose(True)
 
-    tokenizer = AutoTokenizer.from_pretrained(instruct_model)
-
-    # ref: https://discuss.huggingface.co/t/llama2-pad-token-for-batched-inference/48020
-
-    if batch_size > 1:
-        tokenizer.pad_token = tokenizer.bos_token
-        tokenizer.padding_side = "left"
-
-    pipeline_kwargs = dict(
-        max_length=max_length,
-        num_return_sequences=num_return_sequences,
-        eos_token_id=tokenizer.eos_token_id,
-    )
-
-    # https://huggingface.co/docs/transformers/main/model_doc/llama#transformers.LlamaForCausalLM
-    # model_kwargs are passed to LlamaForCausalLM.from_pretrained
-    # These override config.json values: https://huggingface.co/meta-llama/Llama-2-7b-chat-hf/blob/main/config.json
-    model_kwargs = dict(temperature=temperature, top_p=top_p, do_sample=sample, max_length=max_length)
+    tokenizer = AutoTokenizer.from_pretrained(instruct_model.value)
 
     # generate kwargs are passed to $pipeline_instance.__call__ which is equivalent to $model.generate()
     # These override generation_config.json values: https://huggingface.co/meta-llama/Llama-2-7b-chat-hf/blob/main/generation_config.json
@@ -122,12 +104,30 @@ def main(
         eos_token_id=tokenizer.eos_token_id,
     )
 
+    if instruct_model is InstructModel.LLAMA2_7B_CHAT_HF:
+        if batch_size > 1:
+            # ref: https://discuss.huggingface.co/t/llama2-pad-token-for-batched-inference/48020
+            tokenizer.pad_token = tokenizer.bos_token
+            tokenizer.padding_side = "left"
+            # float16 output is gibberish when input is batched; haven't looked into why yet
+            torch_dtype = torch.bfloat16
+    elif instruct_model is InstructModel.CODELLAMA_7B_INSTRUCT_HF:
+        torch_dtype = torch.float16
+        if batch_size > 1:
+            tokenizer.pad_token = tokenizer.eos_token
+            tokenizer.padding_side = "left"
+            pipeline_kwargs["pad_token_id"] = tokenizer.eos_token_id
+
+    # https://huggingface.co/docs/transformers/main/model_doc/llama#transformers.LlamaForCausalLM
+    # model_kwargs are passed to LlamaForCausalLM.from_pretrained
+    # These override config.json values: https://huggingface.co/meta-llama/Llama-2-7b-chat-hf/blob/main/config.json
+    model_kwargs = dict(temperature=temperature, top_p=top_p, do_sample=sample, max_length=max_length)
+
     pipeline = hf_pipeline(
         task="text-generation",
-        model=instruct_model,
+        model=instruct_model.value,
         device_map="auto",
-        torch_dtype=torch.bfloat16,
-        # torch_dtype=torch.float16,
+        torch_dtype=torch_dtype,
         batch_size=batch_size,
         model_kwargs=model_kwargs,
         tokenizer=tokenizer,
@@ -139,7 +139,7 @@ def main(
     if batch_size > 1:
         llm = BatchedHuggingFacePipeline(
             pipeline=pipeline,
-            model_id=instruct_model,
+            model_id=instruct_model.value,
             batch_size=batch_size,
             pipeline_kwargs=pipeline_kwargs,
             model_kwargs=model_kwargs,
@@ -148,20 +148,20 @@ def main(
     else:
         llm = HuggingFacePipeline(
             pipeline=pipeline,
-            model_id=instruct_model,
+            model_id=instruct_model.value,
             batch_size=batch_size,
             pipeline_kwargs=pipeline_kwargs,
             model_kwargs=model_kwargs,
             metadata=metadata,
         )
-    print(f"Loaded instruct model: {instruct_model}")
+    print(f"Loaded instruct model: {instruct_model.value}")
 
     task_kwargs = dict(
         num_examples=num_examples,
         prompt_template_type=prompt_template,
         llm=llm,
         verbose=verbose,
-        instruct_model_id=instruct_model,
+        instruct_model=instruct_model,
         batch_size=batch_size,
         dataset_split=dataset_split,
         dataset_outdir=dataset_outdir,

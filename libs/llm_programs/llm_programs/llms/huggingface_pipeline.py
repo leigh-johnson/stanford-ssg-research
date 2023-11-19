@@ -30,7 +30,12 @@ class BatchedHuggingFacePipeline(HuggingFacePipeline):
         text_generations: List[str] = []
 
         for out in tqdm(
-            self.pipeline(KeyDataset(prompts, "prompt"), batch_size=self.batch_size, return_full_text=False),
+            self.pipeline(
+                KeyDataset(prompts, "prompt"),
+                batch_size=self.batch_size,
+                return_full_text=False,
+                **self.pipeline_kwargs,
+            ),
             total=len(prompts),
         ):
             text_generations.append(out[0]["generated_text"])

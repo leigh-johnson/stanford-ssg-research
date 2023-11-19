@@ -3,6 +3,7 @@ from langchain.prompts.prompt import PromptTemplate
 from langchain.schema.prompt_template import BasePromptTemplate
 
 from llm_programs.prompts.base import BasePrompt, PromptTemplateType
+from llm_programs.models import InstructModel
 
 ANSWER_TOKEN = "####"  # indictates the final answer in ground truth
 
@@ -11,7 +12,7 @@ DATA = {
     "name": "Middle school arithmetic problems",
     "task_description": "Answer the following middle school math word problem.",
     "task_description_cot": "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning. Let's think step-by-step.",
-    "task_description_with_tools": "(Grade school math) Solve the following middle-school arithmetic problems, writing out intermediate arithmetic calculations as python code. Store your result as a variable named 'ans' and print(ans) as the final step.",
+    "task_description_with_program": "(Grade school math) Solve the following middle-school arithmetic problems, using Python code to solve intermediate arithmetic calculations. Wrap code in ``` for readability. Store your result as a variable named 'ans' and print(ans) as the final step.",
     "examples_with_thoughts": [
         {
             "input": "Mason is cleaning out all the junk in his attic. 20% of the items are useful, 10% are valuable heirlooms, and 70% are junk. If Mason's attic has 8 useful items in it, how many junk items does it have?",
@@ -104,7 +105,7 @@ Q4: [EOQ]""",
 # FEW_SHOT_TOOL_PROMPT_TEMPLATE = FewShotPromptTemplate(
 #     examples=DATA["examples_with_tools"],
 #     example_prompt=EXAMPLE_TOOL_PROMPT_TEMPLATE,
-#     prefix=DATA["task_description_with_tools"],
+#     prefix=DATA["task_description_with_program"],
 #     suffix="Question: {input}",
 #     input_variables=["input"],
 # )
@@ -176,7 +177,7 @@ class Gsm8kPrompt(BasePrompt):
         elif self.prompt_template_type is PromptTemplateType.COT:
             return DATA["task_description_cot"]
         elif self.prompt_template_type is PromptTemplateType.PROGRAM:
-            return DATA["task_description_with_tools"]
+            return DATA["task_description_with_program"]
 
         raise NotImplementedError(
             f"Task description for {self.prompt_template_type} is not yet implemented, please add to prompts/gsm8k.py"
@@ -225,13 +226,19 @@ Answer:""",
         )
 
     def zero_shot_program_prompt(self, task_description="") -> BasePromptTemplate:
-        return PromptTemplate(
-            validate_template=True,
-            partial_variables={"task_description": self.task_description()},
-            input_variables=["question"],
-            template="""{task_description}
-Question: {question}""",
-        )
+        if self.instruct_model in [InstructModel.CODELLAMA_7B_INSTRUCT_HF, InstructModel.CODELLAMA_7B_PYTHON_HF]:
+            # based on: https://huggingface.co/blog/codellama#conversational-instructions
+            return PromptTemplate(
+                validate_template=True,
+                partial_variables={"task_description": self.task_description()},
+                input_variables=["question"],
+                template="""<s>[INST] <<SYS>>
+{task_description}
+<</SYS>>
+{question}
+[/INST]""",
+            )
+        raise NotImplementedError
 
     def few_shot_program_prompt(self, num_examples: int, task_description="") -> BasePromptTemplate:
         raise NotImplementedError

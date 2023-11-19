@@ -5,6 +5,8 @@ from langchain.llms.base import BaseLLM
 from langchain.pydantic_v1 import BaseModel
 from langchain.schema.prompt_template import BasePromptTemplate
 
+from llm_programs.models import InstructModel
+
 
 class PromptTemplateType(str, Enum):
     DIRECT = "direct"
@@ -23,6 +25,7 @@ class BasePrompt(BaseModel, ABC):
 
     num_examples: int = 0
     prompt_template_type: PromptTemplateType
+    instruct_model: InstructModel
 
     @abstractmethod
     def parse_final_answer(self) -> str:

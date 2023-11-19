@@ -10,6 +10,7 @@ def load_task(task: str, task_kwargs: Dict[str, Any]) -> BaseTask:
     prompt = prompt_module.PROMPT(
         num_examples=task_kwargs["num_examples"],
         prompt_template_type=task_kwargs["prompt_template_type"],
+        instruct_model=task_kwargs["instruct_model"],
     )
     return task_module.TASK(prompt=prompt, **task_kwargs)
 
