@@ -7,13 +7,13 @@ from langchain.schema.prompt_template import BasePromptTemplate
 
 
 class PromptTemplateType(str, Enum):
-    ZERO_SHOT_DIRECT = "zero_shot_direct"
-    FEW_SHOT_AUTO_COT = "few_shot_auto_cot"
-    FEW_SHOT_TOOL = "few_shot_tool"
+    DIRECT = "direct"
+    COT = "cot"
+    PROGRAM = "program"
 
 
 def is_zero_shot_direct(llm: BaseLLM) -> bool:
-    return llm.metadata.get("prompt_template_type", False) is PromptTemplateType.ZERO_SHOT_DIRECT
+    return llm.metadata.get("prompt_template_type", False) is PromptTemplateType.DIRECT
 
 
 class BasePrompt(BaseModel, ABC):
@@ -44,14 +44,27 @@ class BasePrompt(BaseModel, ABC):
     def few_shot_cot_prompt(self, num_examples: int, task_description="") -> BasePromptTemplate:
         pass
 
+    @abstractmethod
+    def zero_shot_program_prompt(self, task_description="") -> BasePromptTemplate:
+        pass
+
+    @abstractmethod
+    def few_shot_program_prompt(self, num_examples: int, task_description="") -> BasePromptTemplate:
+        pass
+
     def get_prompt(self, **kwargs) -> BasePromptTemplate:
-        if self.prompt_template_type is PromptTemplateType.ZERO_SHOT_DIRECT:
+        if self.prompt_template_type is PromptTemplateType.DIRECT:
             return self.zero_shot_direct_prompt()
-        elif self.prompt_template_type is PromptTemplateType.FEW_SHOT_AUTO_COT:
+        elif self.prompt_template_type is PromptTemplateType.COT:
             if self.num_examples == 0:
                 return self.zero_shot_cot_prompt()
             else:
                 return self.few_shot_cot_prompt(self.num_examples)
+        elif self.prompt_template_type is PromptTemplateType.PROGRAM:
+            if self.num_examples == 0:
+                return self.zero_shot_program_prompt()
+            else:
+                return self.few_shot_program_prompt(self.num_examples)
         raise NotImplementedError(
             f"BasePromptSelector.get_prompt is not yet implemented for {self.prompt_template_type}"
         )

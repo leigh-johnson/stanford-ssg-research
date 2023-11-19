@@ -11,7 +11,7 @@ DATA = {
     "name": "Middle school arithmetic problems",
     "task_description": "Answer the following middle school math word problem.",
     "task_description_cot": "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning. Let's think step-by-step.",
-    "task_description_with_tools": "(Grade school math) Solve the following middle-school arithmetic problems, writing out intermediate arithmetic calculations as python code. Store your result as a variable named 'ans'.",
+    "task_description_with_tools": "(Grade school math) Solve the following middle-school arithmetic problems, writing out intermediate arithmetic calculations as python code. Store your result as a variable named 'ans' and print(ans) as the final step.",
     "examples_with_thoughts": [
         {
             "input": "Mason is cleaning out all the junk in his attic. 20% of the items are useful, 10% are valuable heirlooms, and 70% are junk. If Mason's attic has 8 useful items in it, how many junk items does it have?",
@@ -127,7 +127,7 @@ Q4: [EOQ]""",
 # If these are instantiated as singletons, they leak stake
 
 
-ZERO_SHOT_DIRECT_PROMPT_TEMPLATE = PromptTemplate(
+DIRECT_PROMPT_TEMPLATE = PromptTemplate(
     partial_variables=dict(),
     input_variables=["question", "task_description"],
     template="""{task_description}
@@ -151,8 +151,8 @@ FEW_SHOT_DIRECT_PROMPT_TEMPLATE = FewShotPromptTemplate(
 
 
 # PROMPT_SELECTOR = ConditionalPromptSelector(
-#     default_prompt=ZERO_SHOT_DIRECT_PROMPT_TEMPLATE,
-#     conditionals=[(is_zero_shot_direct, ZERO_SHOT_DIRECT_PROMPT_TEMPLATE)],
+#     default_prompt=DIRECT_PROMPT_TEMPLATE,
+#     conditionals=[(is_zero_shot_direct, DIRECT_PROMPT_TEMPLATE)],
 # )
 
 
@@ -171,10 +171,13 @@ class Gsm8kPrompt(BasePrompt):
         return text.split(ANSWER_TOKEN)[-1].strip()
 
     def task_description(self) -> str:
-        if self.prompt_template_type is PromptTemplateType.ZERO_SHOT_DIRECT:
+        if self.prompt_template_type is PromptTemplateType.DIRECT:
             return DATA["task_description"]
-        elif self.prompt_template_type is PromptTemplateType.FEW_SHOT_AUTO_COT:
+        elif self.prompt_template_type is PromptTemplateType.COT:
             return DATA["task_description_cot"]
+        elif self.prompt_template_type is PromptTemplateType.PROGRAM:
+            return DATA["task_description_with_tools"]
+
         raise NotImplementedError(
             f"Task description for {self.prompt_template_type} is not yet implemented, please add to prompts/gsm8k.py"
         )
@@ -220,6 +223,18 @@ Answer:""",
             template="""Question: {question}
 Answer:""",
         )
+
+    def zero_shot_program_prompt(self, task_description="") -> BasePromptTemplate:
+        return PromptTemplate(
+            validate_template=True,
+            partial_variables={"task_description": self.task_description()},
+            input_variables=["question"],
+            template="""{task_description}
+Question: {question}""",
+        )
+
+    def few_shot_program_prompt(self, num_examples: int, task_description="") -> BasePromptTemplate:
+        raise NotImplementedError
 
 
 PROMPT = Gsm8kPrompt

@@ -1,3 +1,14 @@
+
+# 2023-11-15
+
+Comparing perplexity within easy, medium, hard tasks.
+
+"Easy" meaning a task the model is well-suited for.
+"Medium" some middle-of-the-road task
+"Hard" some task the model is not well-suited for.
+
+Relationship between difficulty and perplexity score, thinking about some metric in terms of ratio of perplexity : of successful easy task to perplexity : of successful medium task.
+
 # 2023-11-12
 
 * Test different decoding strategies: 
