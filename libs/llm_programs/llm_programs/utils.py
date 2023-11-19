@@ -9,7 +9,7 @@ def extract_python_code(row, input_column: str = "generated", output_column="pro
     Extracts python code between separator tokens: ```
     """
 
-    match = re.match(row[input_column])
+    match = re.match(regex, row[input_column])
     if match:
         row[output_column] = match.group(0)
     else:
