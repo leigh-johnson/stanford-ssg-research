@@ -43,10 +43,6 @@ class BaseTask(BaseModel, ABC):
         )
 
     @abstractmethod
-    def calc_accuracy(self, batch):
-        pass
-
-    @abstractmethod
     def calc_perplexity(self, batch):
         pass
 

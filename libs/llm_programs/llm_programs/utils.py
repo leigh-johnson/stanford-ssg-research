@@ -24,7 +24,7 @@ def run_python_code(row, input_column: str = "program", output_column="program_o
     print("Running command: \n", command)
     try:
         result = client.containers.run(DOCKER_TAG, command=command, remove=True)
-        row[output_column] = result
+        row[output_column] = result.decode("utf8")
         row[error_column] = False
     except docker.errors.ContainerError as e:
         row[output_column] = str(e)
