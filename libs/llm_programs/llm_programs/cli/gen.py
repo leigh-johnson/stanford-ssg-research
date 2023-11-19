@@ -113,10 +113,10 @@ def main(
             torch_dtype = torch.bfloat16
     elif instruct_model is InstructModel.CODELLAMA_7B_INSTRUCT_HF:
         torch_dtype = torch.float16
+        pipeline_kwargs["pad_token_id"] = tokenizer.eos_token_id
         if batch_size > 1:
             tokenizer.pad_token = tokenizer.eos_token
             tokenizer.padding_side = "left"
-            pipeline_kwargs["pad_token_id"] = tokenizer.eos_token_id
 
     # https://huggingface.co/docs/transformers/main/model_doc/llama#transformers.LlamaForCausalLM
     # model_kwargs are passed to LlamaForCausalLM.from_pretrained
