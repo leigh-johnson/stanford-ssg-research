@@ -52,11 +52,10 @@ All together, we need 118 bulbs.""",
             "answer": "100 points",
         },
     ],
-    "examples_with_tools": [
+    "examples_with_python_code": [
         {
             "input": "A toy manufacturer receives an order for 400 toys. 5 workers are available to work on the order. 2 of the workers produce 6 toys an hour, and another 2 workers produce 4 toys an hour. They all work on the order during their 10-hour shift, and by the end of their shift the manufacturer still needs another 20 toys to be able to ship the order. How many toys per hour does the fifth worker produce?",
-            "actions": """Q1: [generate python code] write down the arithmetic or algebra equations as python code
-#1:
+            "actions": """```
 num_toys_ordered = 400
 num_workers = 5
 toys_produced_per_hour_by_worker1 = 6
@@ -70,27 +69,18 @@ toys_produced_by_all_workers = ( toys_produced_per_hour_by_worker1 + toys_produc
 solution = solve_it(toys_produced_by_all_workers - toys_produced, toys_produced_per_hour_by_worker5)
 ans = solution[toys_produced_per_hour_by_worker5]
 print(ans)
-Q2: [code execute] Execute the python code in #1 and get the value of "ans"
-#2: 18
-Q3: [add unit] Add the appropriate unit to the final answer.
-#3: 18 toys
-Q3: [EOQ]""",
+```""",
             "answer": "18 toys",
         },
         {
             "input": "If two trains depart from a station in opposite directions, and one train is traveling 60 miles an hour while the other is traveling half that distance per hour, how far apart are they from each other after 3 hours?",
-            "actions": """Q1: [generate python code] write down the arithmetic or algebra equations as python code
-#1:
+            "actions": """```
 speed_of_first_train = 60
 speed_of_second_train = 30
 distance_apart = speed_of_first_train * 3 + speed_of_second_train * 3
 ans = distance_apart
 print(ans)
-Q2: [code execute] Execute the python code and get the value of "ans"
-#2: 270
-Q3: [add unit] Add the appropriate unit to the final answer.
-#3: 270 miles
-Q4: [EOQ]""",
+```""",
             "answer": "270 miles",
         },
     ],
@@ -241,6 +231,33 @@ Answer:""",
         raise NotImplementedError
 
     def few_shot_program_prompt(self, num_examples: int, task_description="") -> BasePromptTemplate:
+        if self.instruct_model in [InstructModel.CODELLAMA_7B_INSTRUCT_HF, InstructModel.CODELLAMA_7B_PYTHON_HF]:
+            examples = []
+            for i in range(0, num_examples):
+                example_q = DATA["examples_with_thoughts"][i]["input"]
+                example_p = DATA["examples_with_thoughts"][i]["actions"]
+                # TODO
+                # example_a = DATA["examples_with_thoughts"][i]["answer"]
+                example = f"""Question: {example_q}
+Answer:
+{example_p}
+"""
+                examples.append(example)
+            examples = "\n".join(examples)
+            # based on: https://huggingface.co/blog/codellama#conversational-instructions
+            return PromptTemplate(
+                validate_template=True,
+                partial_variables={"task_description": self.task_description(), "examples": examples},
+                input_variables=["question"],
+                template="""<s>[INST] <<SYS>>
+{task_description}
+Examples:
+{examples}
+<</SYS>>
+Question: {question}
+Answer:
+[/INST]""",
+            )
         raise NotImplementedError
 
 
