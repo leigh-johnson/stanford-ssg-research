@@ -234,8 +234,8 @@ Answer:""",
         if self.instruct_model in [InstructModel.CODELLAMA_7B_INSTRUCT_HF, InstructModel.CODELLAMA_7B_PYTHON_HF]:
             examples = []
             for i in range(0, num_examples):
-                example_q = DATA["examples_with_thoughts"][i]["input"]
-                example_p = DATA["examples_with_thoughts"][i]["actions"]
+                example_q = DATA["examples_with_python_code"][i]["input"]
+                example_p = DATA["examples_with_python_code"][i]["actions"]
                 # TODO
                 # example_a = DATA["examples_with_thoughts"][i]["answer"]
                 example = f"""Question: {example_q}
