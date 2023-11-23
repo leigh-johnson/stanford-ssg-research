@@ -179,22 +179,20 @@ class Gsm8kPrompt(BasePrompt):
             example_q = DATA["examples_with_thoughts"][i]["input"]
             example_t = DATA["examples_with_thoughts"][i]["thoughts"]
             example_a = DATA["examples_with_thoughts"][i]["answer"]
-            example = f"""Question: {example_q}
-Answer: Let's think step-by-step.
-{example_t}
-Final Answer: {example_a}
-"""
+            example = f"""QUESTION: {example_q}
+ANSWER: {example_t}
+FINAL ANSWER: {example_a}"""
             examples.append(example)
-        examples = "\n".join(examples)
+        examples = "\n\n".join(examples)
         return PromptTemplate(
             validate_template=True,
             partial_variables={"task_description": self.task_description(), "examples": examples},
             input_variables=["question"],
             template="""{task_description}
 {examples}
-Question: {question}
-Answer: Let's think step-by-step.
-""",
+
+
+{question}""",
         )
 
     def zero_shot_cot_prompt(self) -> BasePromptTemplate:
@@ -203,8 +201,8 @@ Answer: Let's think step-by-step.
             partial_variables={"task_description": self.task_description()},
             input_variables=["question"],
             template="""{task_description}
-Question: {question}
-Answer:""",
+QUESTION: {question}
+ANSWER:""",
         )
 
     def zero_shot_direct_prompt(self) -> BasePromptTemplate:
@@ -238,12 +236,12 @@ Answer:""",
                 example_p = DATA["examples_with_python_code"][i]["actions"]
                 # TODO
                 # example_a = DATA["examples_with_thoughts"][i]["answer"]
-                example = f"""Question: {example_q}
-Answer:
+                example = f"""QUESTION: {example_q}
+ANSWER:
 {example_p}
 """
                 examples.append(example)
-            examples = "\n".join(examples)
+            examples = "\n\n".join(examples)
             # based on: https://huggingface.co/blog/codellama#conversational-instructions
             return PromptTemplate(
                 validate_template=True,
@@ -251,9 +249,10 @@ Answer:
                 input_variables=["question"],
                 template="""<s>[INST] <<SYS>>
 {task_description}
-Follow these examples:
 {examples}
 <</SYS>>
+
+
 {question}
 [/INST]""",
             )
