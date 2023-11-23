@@ -251,11 +251,10 @@ Answer:
                 input_variables=["question"],
                 template="""<s>[INST] <<SYS>>
 {task_description}
-Examples:
+Follow these examples:
 {examples}
 <</SYS>>
-Question: {question}
-Answer:
+{question}
 [/INST]""",
             )
         raise NotImplementedError
