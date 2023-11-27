@@ -188,10 +188,13 @@ FINAL ANSWER: {example_a}"""
             validate_template=True,
             partial_variables={"task_description": self.task_description(), "examples": examples},
             input_variables=["question"],
-            template="""{task_description}
+            template="""<s>[INST] <<SYS>>
+{task_description}
 {examples}
+<</SYS>>
 QUESTION: {question}
-ANSWER:""",
+ANSWER:
+[/INST]""",
         )
 
     def zero_shot_cot_prompt(self) -> BasePromptTemplate:
@@ -199,9 +202,12 @@ ANSWER:""",
             validate_template=True,
             partial_variables={"task_description": self.task_description()},
             input_variables=["question"],
-            template="""{task_description}
+            template="""<s>[INST] <<SYS>>
+{task_description}
+<</SYS>>
 QUESTION: {question}
-ANSWER:""",
+ANSWER:
+[/INST]""",
         )
 
     def zero_shot_direct_prompt(self) -> BasePromptTemplate:
@@ -250,8 +256,6 @@ ANSWER:
 {task_description}
 {examples}
 <</SYS>>
-
-
 {question}
 [/INST]""",
             )
