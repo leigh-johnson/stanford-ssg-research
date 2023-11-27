@@ -183,16 +183,15 @@ class Gsm8kPrompt(BasePrompt):
 ANSWER: {example_t}
 FINAL ANSWER: {example_a}"""
             examples.append(example)
-        examples = "\n\n".join(examples)
+        examples = "\n".join(examples)
         return PromptTemplate(
             validate_template=True,
             partial_variables={"task_description": self.task_description(), "examples": examples},
             input_variables=["question"],
             template="""{task_description}
 {examples}
-
-
-{question}""",
+QUESTION: {question}
+ANSWER:""",
         )
 
     def zero_shot_cot_prompt(self) -> BasePromptTemplate:
