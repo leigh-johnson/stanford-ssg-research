@@ -30,9 +30,12 @@ class Gsm8kTask(BaseTask):
 
     def calc_language_accuracy(self, row, column="generated"):
         expected = self.prompt.parse_final_answer(row["answer"])
-        final_answer = row[column].split("\n")[-1]
-        hit = expected in final_answer
+        if self.prompt_template_type is PromptTemplateType.DIRECT:
+            final_answer = row[column].split("\n")[-1]
+        elif self.prompt_template_type is PromptTemplateType.COT:
+            final_answer = row[column].split("FINAL ANSWER:")[-1]
 
+        hit = expected in final_answer
         row[self.accuracy_column] = hit
         return row
 
