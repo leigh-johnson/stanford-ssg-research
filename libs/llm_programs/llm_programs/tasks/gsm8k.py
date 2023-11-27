@@ -65,7 +65,7 @@ class Gsm8kTask(BaseTask):
             llmchain = self.llmchain()
             results = llmchain.batch(dataset, batch_size=self.batch_size)
             dataset = dataset.add_column(self.generated_column, results)
-            return dataset.map(self.calc_language_accuracy, relesc="Calculating Accuracy")
+            return dataset.map(self.calc_language_accuracy, desc="Calculating Accuracy")
         return dataset.map(self.score_language_row, desc="Scoring")
 
     def score_program_output(self, dataset) -> Dataset:
