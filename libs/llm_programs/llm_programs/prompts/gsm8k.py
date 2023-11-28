@@ -192,8 +192,7 @@ FINAL ANSWER: {example_a}"""
 {task_description}
 {examples}
 <</SYS>>
-QUESTION: {question}
-[/INST]""",
+QUESTION: {question}[/INST]""",
         )
 
     def zero_shot_cot_prompt(self) -> BasePromptTemplate:
@@ -204,8 +203,7 @@ QUESTION: {question}
             template="""<s>[INST] <<SYS>>
 {task_description}
 <</SYS>>
-QUESTION: {question}
-[/INST]""",
+QUESTION: {question}[/INST]""",
         )
 
     def zero_shot_direct_prompt(self) -> BasePromptTemplate:
@@ -226,8 +224,7 @@ Answer:""",
                 template="""<s>[INST] <<SYS>>
 {task_description}
 <</SYS>>
-{question}
-[/INST]""",
+{question}[/INST]""",
             )
         raise NotImplementedError
 
@@ -254,8 +251,7 @@ ANSWER:
 {task_description}
 {examples}
 <</SYS>>
-{question}
-[/INST]""",
+{question}[/INST]""",
             )
         raise NotImplementedError
 
