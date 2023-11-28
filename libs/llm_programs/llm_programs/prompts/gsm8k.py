@@ -11,7 +11,7 @@ DATA = {
     "id": "gsm8k",
     "name": "Middle school arithmetic problems",
     "task_description": "Answer the following middle school math word problem.",
-    "task_description_cot": "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning. Let's think step-by-step.",
+    "task_description_cot": "Answer the following middle school math word problem, which requires multi-step arithmetic reasoning. Show your step-by-step thinking.",
     "task_description_with_program": "(Grade school math) Solve the following middle-school arithmetic problems, using Python code to solve intermediate arithmetic calculations. Wrap code in ``` for readability. Store your result as a variable named 'ans' and print(ans) as the final step.",
     "examples_with_thoughts": [
         {
@@ -193,7 +193,6 @@ FINAL ANSWER: {example_a}"""
 {examples}
 <</SYS>>
 QUESTION: {question}
-ANSWER:
 [/INST]""",
         )
 
@@ -206,8 +205,6 @@ ANSWER:
 {task_description}
 <</SYS>>
 QUESTION: {question}
-ANSWER:
-FINAL ANSWER:
 [/INST]""",
         )
 

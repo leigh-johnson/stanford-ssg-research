@@ -33,8 +33,7 @@ class Gsm8kTask(BaseTask):
         if self.prompt_template_type is PromptTemplateType.DIRECT:
             final_answer = row[column].split("\n")[-1]
         elif self.prompt_template_type is PromptTemplateType.COT:
-            final_answer = row[column].split("FINAL ANSWER:")[-1]
-
+            final_answer = row[column].split("FINAL ANSWER:")[-1].split("\n\n")
         hit = expected in final_answer
         row[self.accuracy_column] = hit
         return row
